@@ -3,156 +3,214 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roblox Web Dashboard</title>
+  <title>K3 Dashboard Monitoring</title>
   <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: rgba(24, 24, 27, 0.85);
+      --border: #27272a;
+      --accent: #00ff88;
+      --accent-hover: #00cc6a;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+    }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #1e1e2f;
-      color: #fff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 40px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 50px 20px;
     }
-    .card {
-      background-color: #2a2a40;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-      width: 100%;
-      max-width: 600px;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    input {
-      padding: 12px;
-      width: 60%;
-      border: none;
-      border-radius: 6px;
-      margin-bottom: 15px;
-      font-size: 16px;
-      background-color: #1a1a2e;
-      color: #fff;
-    }
-    input:focus { outline: 2px solid #00ff88; }
-    button {
-      padding: 12px 24px;
-      background-color: #00ff88;
-      color: #1e1e2f;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 16px;
-      transition: 0.2s;
-    }
-    button:hover { background-color: #00cc6a; }
     
-    .btn-lb {
-      background-color: #3a3a50;
-      color: #fff;
-      padding: 10px 15px;
-      font-size: 14px;
-      margin: 0 5px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
+    /* Layout Utama */
+    .dashboard-container {
+      width: 100%;
+      max-width: 1200px;
     }
-    .btn-lb:hover, .btn-lb:focus { background-color: #00ff88; color: #1e1e2f; }
+    .header-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    .header-panel h1 {
+      margin: 0;
+      font-size: 28px;
+      color: var(--accent);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
 
-    .result-box {
-      margin-top: 25px;
-      background-color: #1a1a2e;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: left;
-      display: none;
+    /* Kartu & Tabel */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .db-section {
+    .controls {
+      display: flex;
+      gap: 15px;
       margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #3a3a50;
+      background: #121214;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
     }
-    .db-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-    .db-title { color: #00ff88; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-    .stat { display: flex; justify-content: space-between; padding: 4px 0; font-size: 15px; }
-    .error { color: #ff4d4d; margin-top: 15px; display: none; }
-    pre { background: #111; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
+    button {
+      padding: 12px 20px;
+      background-color: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    button.active, button:hover {
+      background-color: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+    
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 15px; border-bottom: 2px solid var(--border); color: var(--text-muted); text-transform: uppercase; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+    td { padding: 15px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:hover { background-color: rgba(255, 255, 255, 0.03); cursor: pointer; }
+    
+    .avatar-cell { display: flex; align-items: center; gap: 15px; }
+    .avatar-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--border); background-color: #27272a; object-fit: cover; }
+    .val-highlight { font-size: 18px; font-weight: bold; color: var(--accent); }
 
-    table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 15px; }
-    th { padding: 12px; border-bottom: 2px solid #00ff88; color: #00ff88; text-transform: uppercase; font-size: 12px;}
-    td { padding: 12px; border-bottom: 1px solid #3a3a50; }
-    tr:hover { background-color: #1a1a2e; }
+    /* Modal / Pop-up Detail Player */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+      display: none; justify-content: center; align-items: center; z-index: 100;
+    }
+    .modal-content {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; width: 100%; max-width: 650px;
+      padding: 30px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      max-height: 90vh; overflow-y: auto;
+    }
+    .close-btn {
+      position: absolute; top: 20px; right: 25px;
+      background: transparent; border: none; color: var(--text-muted);
+      font-size: 24px; cursor: pointer; padding: 0;
+    }
+    .close-btn:hover { color: #ff4d4d; background: transparent; border: none; }
+
+    /* Modal Layout */
+    .modal-header { display: flex; gap: 20px; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px; }
+    .modal-avatar { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--accent); }
+    .modal-user-info h2 { margin: 0; font-size: 24px; }
+    .modal-user-info p { margin: 5px 0 0 0; color: var(--text-muted); font-family: monospace; }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .db-section { background: #121214; padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+    .db-title { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: bold; }
+    .stat { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+    .stat:last-child { border-bottom: none; }
+    
+    .loader { color: var(--accent); text-align: center; padding: 40px; font-weight: bold; letter-spacing: 1px; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
   </style>
 </head>
 <body>
 
-  <!-- KARTU 1: GLOBAL LEADERBOARD (Otomatis memuat list player) -->
-  <div class="card" style="max-width: 800px;">
-    <h2>🏆 Global Leaderboard & Player List</h2>
-    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-      <button onclick="loadLeaderboard('level')" class="btn-lb">⭐ Top Level</button>
-      <button onclick="loadLeaderboard('coins')" class="btn-lb">🪙 Top Coins</button>
-      <button onclick="loadLeaderboard('score')" class="btn-lb">🎯 Top Total Score</button>
+  <div class="dashboard-container">
+    <div class="header-panel">
+      <h1>Monitoring DataStore</h1>
+      <!-- Input manual kalau mau cari player yg gak ada di rank top 50 -->
+      <div style="display: flex; gap: 10px;">
+        <input type="number" id="userIdInput" placeholder="Cari User ID Khusus..." style="margin: 0; width: 250px;">
+        <button id="searchBtn" style="background: var(--card-bg);">Cari Manual</button>
+      </div>
     </div>
 
-    <div style="overflow-x: auto;">
-      <table id="lbTable">
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Player</th>
-            <th>User ID</th>
-            <th id="lbValueHeader">Score / Value</th>
-          </tr>
-        </thead>
-        <tbody id="lbBody">
-          <tr>
-            <td colspan="4" style="text-align: center; padding: 30px; color: #aaa;">
-              Memuat data pemain...
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="card">
+      <div class="controls">
+        <button id="btnLevel" class="active" onclick="loadLeaderboard('level')">⭐ Top Level</button>
+        <button id="btnCoins" onclick="loadLeaderboard('coins')">🪙 Top Coins</button>
+        <button id="btnScore" onclick="loadLeaderboard('score')">🎯 Top Score</button>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="lbTable">
+          <thead>
+            <tr>
+              <th width="8%">Rank</th>
+              <th width="25%">Roblox Account</th>
+              <th width="20%">Roleplay Name</th>
+              <th width="15%">School</th>
+              <th width="10%">Class</th>
+              <th width="22%" style="text-align: right;" id="lbValueHeader">Level</th>
+            </tr>
+          </thead>
+          <tbody id="lbBody">
+            <!-- Data akan masuk ke sini via JS -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- KARTU 2: PENCARIAN DETAIL PLAYER -->
-  <div class="card" style="max-width: 800px;">
-    <h2>🔍 Cari Detail DataStore Pemain</h2>
-    <input type="number" id="userIdInput" placeholder="Masukkan Roblox User ID..." />
-    <br>
-    <button id="searchBtn">Cari Data Lengkap</button>
-    <p id="errorMsg" class="error"></p>
+  <!-- MODAL DETAIL PLAYER -->
+  <div id="playerModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeModal()">×</button>
+      
+      <div id="modalLoading" class="loader" style="display: none;">MEMUAT DATA DATABASE...</div>
+      
+      <div id="modalData" style="display: none;">
+        <div class="modal-header">
+          <img id="modAvatar" class="modal-avatar" src="" alt="Avatar">
+          <div class="modal-user-info">
+            <h2 id="modDisplayName">Display Name</h2>
+            <p>@<span id="modUsername">username</span> | ID: <span id="modUserId">0000000</span></p>
+          </div>
+        </div>
 
-    <div id="resultBox" class="result-box">
-      <div class="db-section" style="background: #202030; padding: 15px; border-radius: 8px;">
-        <div class="db-title" style="color: #fff;">🎮 Roblox Account</div>
-        <div class="stat"><span>Username:</span> <strong id="resUsername">-</strong></div>
-        <div class="stat"><span>Display Name:</span> <strong id="resDisplayName">-</strong></div>
+        <div class="grid-2">
+          <div class="db-section">
+            <div class="db-title">👤 Profile & Academic</div>
+            <div class="stat"><span>RP Name:</span> <strong id="resRpName">-</strong></div>
+            <div class="stat"><span>School:</span> <strong id="resSchool">-</strong></div>
+            <div class="stat"><span>Class:</span> <strong id="resClass">-</strong></div>
+          </div>
+          
+          <div class="db-section">
+            <div class="db-title">💰 Economy DB</div>
+            <div class="stat"><span>Level:</span> <strong id="resLevel">-</strong></div>
+            <div class="stat"><span>Coins:</span> <strong id="resCoins">-</strong></div>
+            <div class="stat"><span>Login Streak:</span> <strong id="resStreak">-</strong></div>
+          </div>
+        </div>
+
+        <div class="db-section" style="margin-top: 20px;">
+          <div class="db-title">🏆 Quiz Scores DB</div>
+          <div class="grid-2">
+            <div>
+              <div class="stat"><span>Truth Quiz:</span> <strong id="scoreTruth">-</strong></div>
+              <div class="stat"><span>Time Quiz:</span> <strong id="scoreTime">-</strong></div>
+              <div class="stat"><span>Magic Quiz:</span> <strong id="scoreMagic">-</strong></div>
+            </div>
+            <div>
+              <div class="stat"><span>Kind Quiz:</span> <strong id="scoreKind">-</strong></div>
+              <div class="stat"><span>Trust Quiz:</span> <strong id="scoreTrust">-</strong></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="db-section">
-        <div class="db-title">💰 Roleplay Eco DB (V4)</div>
-        <div class="stat"><span>Coins:</span> <strong id="resCoins">-</strong></div>
-        <div class="stat"><span>Level:</span> <strong id="resLevel">-</strong></div>
-        <div class="stat"><span>School:</span> <strong id="resSchool">-</strong></div>
-        <div class="stat"><span>Class:</span> <strong id="resClass">-</strong></div>
-      </div>
-      <div class="db-section">
-        <div class="db-title">👤 Roleplay Profile DB (V3)</div>
-        <div class="stat"><span>RP Name:</span> <strong id="resRpName">-</strong></div>
-      </div>
-      <div class="db-section">
-        <div class="db-title">🏆 Land Of Character Scores (V2)</div>
-        <div class="stat"><span>Truth Quiz:</span> <strong id="scoreTruth">-</strong></div>
-        <div class="stat"><span>Time Quiz:</span> <strong id="scoreTime">-</strong></div>
-        <div class="stat"><span>Magic Quiz:</span> <strong id="scoreMagic">-</strong></div>
-        <div class="stat"><span>Kind Quiz:</span> <strong id="scoreKind">-</strong></div>
-        <div class="stat"><span>Trust Quiz:</span> <strong id="scoreTrust">-</strong></div>
-      </div>
-      <h4 style="margin-top: 20px; color: #aaa;">Raw JSON Response:</h4>
-      <pre id="resRaw"></pre>
+
     </div>
   </div>
 
