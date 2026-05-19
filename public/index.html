@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi DataStore Explorer</title>
+  <title>Roblox Web Dashboard</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -22,6 +22,7 @@
       width: 100%;
       max-width: 600px;
       text-align: center;
+      margin-bottom: 30px;
     }
     input {
       padding: 12px;
@@ -46,6 +47,20 @@
       transition: 0.2s;
     }
     button:hover { background-color: #00cc6a; }
+    
+    .btn-lb {
+      background-color: #3a3a50;
+      color: #fff;
+      padding: 10px 15px;
+      font-size: 14px;
+      margin: 0 5px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-lb:hover, .btn-lb:focus { background-color: #00ff88; color: #1e1e2f; }
+
     .result-box {
       margin-top: 25px;
       background-color: #1a1a2e;
@@ -59,48 +74,64 @@
       padding-bottom: 15px;
       border-bottom: 1px solid #3a3a50;
     }
-    .db-section:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-    .db-title {
-      color: #00ff88;
-      font-size: 14px;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .stat {
-      display: flex;
-      justify-content: space-between;
-      padding: 4px 0;
-      font-size: 15px;
-    }
+    .db-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .db-title { color: #00ff88; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+    .stat { display: flex; justify-content: space-between; padding: 4px 0; font-size: 15px; }
     .error { color: #ff4d4d; margin-top: 15px; display: none; }
     pre { background: #111; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 15px; }
+    th { padding: 12px; border-bottom: 2px solid #00ff88; color: #00ff88; text-transform: uppercase; font-size: 12px;}
+    td { padding: 12px; border-bottom: 1px solid #3a3a50; }
+    tr:hover { background-color: #1a1a2e; }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h2>Multi DataStore Explorer</h2>
-    <p>Mengambil data dari 3 DataStore (7 Keys) sekaligus</p>
-    
+  <!-- KARTU 1: GLOBAL LEADERBOARD (Otomatis memuat list player) -->
+  <div class="card" style="max-width: 800px;">
+    <h2>🏆 Global Leaderboard & Player List</h2>
+    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+      <button onclick="loadLeaderboard('level')" class="btn-lb">⭐ Top Level</button>
+      <button onclick="loadLeaderboard('coins')" class="btn-lb">🪙 Top Coins</button>
+      <button onclick="loadLeaderboard('score')" class="btn-lb">🎯 Top Total Score</button>
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table id="lbTable">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>User ID</th>
+            <th id="lbValueHeader">Score / Value</th>
+          </tr>
+        </thead>
+        <tbody id="lbBody">
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 30px; color: #aaa;">
+              Memuat data pemain...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- KARTU 2: PENCARIAN DETAIL PLAYER -->
+  <div class="card" style="max-width: 800px;">
+    <h2>🔍 Cari Detail DataStore Pemain</h2>
     <input type="number" id="userIdInput" placeholder="Masukkan Roblox User ID..." />
     <br>
-    <button id="searchBtn">Cari Data</button>
-
+    <button id="searchBtn">Cari Data Lengkap</button>
     <p id="errorMsg" class="error"></p>
 
     <div id="resultBox" class="result-box">
-      <!-- Bagian Akun Roblox Asli -->
       <div class="db-section" style="background: #202030; padding: 15px; border-radius: 8px;">
         <div class="db-title" style="color: #fff;">🎮 Roblox Account</div>
         <div class="stat"><span>Username:</span> <strong id="resUsername">-</strong></div>
         <div class="stat"><span>Display Name:</span> <strong id="resDisplayName">-</strong></div>
       </div>
-      <!-- Bagian Eco DB -->
       <div class="db-section">
         <div class="db-title">💰 Roleplay Eco DB (V4)</div>
         <div class="stat"><span>Coins:</span> <strong id="resCoins">-</strong></div>
@@ -108,14 +139,10 @@
         <div class="stat"><span>School:</span> <strong id="resSchool">-</strong></div>
         <div class="stat"><span>Class:</span> <strong id="resClass">-</strong></div>
       </div>
-
-      <!-- Bagian Profile DB -->
       <div class="db-section">
         <div class="db-title">👤 Roleplay Profile DB (V3)</div>
         <div class="stat"><span>RP Name:</span> <strong id="resRpName">-</strong></div>
       </div>
-
-      <!-- Bagian Scores DB -->
       <div class="db-section">
         <div class="db-title">🏆 Land Of Character Scores (V2)</div>
         <div class="stat"><span>Truth Quiz:</span> <strong id="scoreTruth">-</strong></div>
@@ -124,7 +151,6 @@
         <div class="stat"><span>Kind Quiz:</span> <strong id="scoreKind">-</strong></div>
         <div class="stat"><span>Trust Quiz:</span> <strong id="scoreTrust">-</strong></div>
       </div>
-
       <h4 style="margin-top: 20px; color: #aaa;">Raw JSON Response:</h4>
       <pre id="resRaw"></pre>
     </div>
