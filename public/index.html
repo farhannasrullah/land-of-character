@@ -25,90 +25,39 @@
       align-items: center;
     }
     
-    /* Layout Utama */
-    .dashboard-container {
-      width: 100%;
-      max-width: 1200px;
-    }
-    .header-panel {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 25px;
-    }
-    .header-panel h1 {
-      margin: 0;
-      font-size: 28px;
-      color: var(--accent);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
+    .dashboard-container { width: 100%; max-width: 1200px; }
+    .header-panel { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;}
+    .header-panel h1 { margin: 0; font-size: 28px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
 
-    /* Kartu & Tabel */
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    .controls {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-      background: #121214;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-    button {
-      padding: 12px 20px;
-      background-color: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-    button.active, button:hover {
-      background-color: var(--accent);
-      color: var(--bg);
-      border-color: var(--accent);
-    }
+    .card { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 12px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 25px;}
     
+    .controls { display: flex; gap: 15px; margin-bottom: 20px; background: #121214; padding: 10px; border-radius: 8px; border: 1px solid var(--border); flex-wrap: wrap;}
+    button { padding: 12px 20px; background-color: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+    button.active, button:hover { background-color: var(--accent); color: var(--bg); border-color: var(--accent); }
+    
+    /* Search & Sort Toolbar */
+    .toolbar { display: none; gap: 15px; margin-bottom: 20px; width: 100%; flex-wrap: wrap; background: #121214; padding: 15px; border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box;}
+    input[type="text"], input[type="number"], select { padding: 12px; border-radius: 6px; background-color: #1a1a2e; color: #fff; border: 1px solid var(--border); font-size: 14px; }
+    input:focus, select:focus { outline: 2px solid var(--accent); }
+    .search-input { flex: 1; min-width: 200px; }
+
     .table-wrapper { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; text-align: left; }
     th { padding: 15px; border-bottom: 2px solid var(--border); color: var(--text-muted); text-transform: uppercase; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
     td { padding: 15px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    tr:hover { background-color: rgba(255, 255, 255, 0.03); cursor: pointer; }
+    tr.data-row:hover { background-color: rgba(255, 255, 255, 0.03); cursor: pointer; }
     
     .avatar-cell { display: flex; align-items: center; gap: 15px; }
     .avatar-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--border); background-color: #27272a; object-fit: cover; }
     .val-highlight { font-size: 18px; font-weight: bold; color: var(--accent); }
+    .idx-col { color: var(--text-muted); font-weight: bold; }
 
-    /* Modal / Pop-up Detail Player */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
-      display: none; justify-content: center; align-items: center; z-index: 100;
-    }
-    .modal-content {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 12px; width: 100%; max-width: 650px;
-      padding: 30px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-      max-height: 90vh; overflow-y: auto;
-    }
-    .close-btn {
-      position: absolute; top: 20px; right: 25px;
-      background: transparent; border: none; color: var(--text-muted);
-      font-size: 24px; cursor: pointer; padding: 0;
-    }
-    .close-btn:hover { color: #ff4d4d; background: transparent; border: none; }
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 100; }
+    .modal-content { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 650px; padding: 30px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; }
+    .close-btn { position: absolute; top: 20px; right: 25px; background: transparent; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; padding: 0; }
+    .close-btn:hover { color: #ff4d4d; }
 
-    /* Modal Layout */
     .modal-header { display: flex; gap: 20px; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px; }
     .modal-avatar { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--accent); }
     .modal-user-info h2 { margin: 0; font-size: 24px; }
@@ -128,26 +77,39 @@
 
   <div class="dashboard-container">
     <div class="header-panel">
-      <h1>Monitoring DataStore</h1>
-      <!-- Input manual kalau mau cari player yg gak ada di rank top 50 -->
+      <h1>Dashboard Monitoring</h1>
       <div style="display: flex; gap: 10px;">
-        <input type="number" id="userIdInput" placeholder="Cari User ID Khusus..." style="margin: 0; width: 250px;">
-        <button id="searchBtn" style="background: var(--card-bg);">Cari Manual</button>
+        <input type="number" id="manualUserId" placeholder="Cari User ID Spesifik..." style="margin: 0; width: 220px;">
+        <button id="manualSearchBtn" style="background: var(--card-bg);">Cari Manual</button>
       </div>
     </div>
 
     <div class="card">
       <div class="controls">
-        <button id="btnLevel" class="active" onclick="loadLeaderboard('level')">⭐ Top Level</button>
+        <button id="btnUsers" class="active" onclick="loadAllUsers()">👥 Semua Pemain</button>
+        <span style="border-left: 2px solid #27272a; margin: 0 5px;"></span>
+        <button id="btnLevel" onclick="loadLeaderboard('level')">⭐ Top Level</button>
         <button id="btnCoins" onclick="loadLeaderboard('coins')">🪙 Top Coins</button>
         <button id="btnScore" onclick="loadLeaderboard('score')">🎯 Top Score</button>
       </div>
 
+      <!-- Toolbar Pencarian & Filter (Hanya muncul di Tab Semua Pemain) -->
+      <div id="usersToolbar" class="toolbar">
+        <input type="text" id="searchInput" class="search-input" placeholder="Cari berdasarkan Username, RP Name, atau School...">
+        <select id="sortSelect">
+          <option value="name-asc">Username (A - Z)</option>
+          <option value="name-desc">Username (Z - A)</option>
+          <option value="rp-asc">RP Name (A - Z)</option>
+          <option value="school-asc">School (A - Z)</option>
+          <option value="level-desc">Level Tertinggi</option>
+        </select>
+      </div>
+
       <div class="table-wrapper">
-        <table id="lbTable">
+        <table id="mainTable">
           <thead>
             <tr>
-              <th width="8%">Rank</th>
+              <th width="8%" id="colRank">Idx</th>
               <th width="25%">Roblox Account</th>
               <th width="20%">Roleplay Name</th>
               <th width="15%">School</th>
@@ -156,20 +118,18 @@
             </tr>
           </thead>
           <tbody id="lbBody">
-            <!-- Data akan masuk ke sini via JS -->
+            <!-- Data injeksi JS -->
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- MODAL DETAIL PLAYER -->
+  <!-- MODAL DETAIL -->
   <div id="playerModal" class="modal-overlay">
     <div class="modal-content">
       <button class="close-btn" onclick="closeModal()">×</button>
-      
       <div id="modalLoading" class="loader" style="display: none;">MEMUAT DATA DATABASE...</div>
-      
       <div id="modalData" style="display: none;">
         <div class="modal-header">
           <img id="modAvatar" class="modal-avatar" src="" alt="Avatar">
@@ -186,7 +146,6 @@
             <div class="stat"><span>School:</span> <strong id="resSchool">-</strong></div>
             <div class="stat"><span>Class:</span> <strong id="resClass">-</strong></div>
           </div>
-          
           <div class="db-section">
             <div class="db-title">💰 Economy DB</div>
             <div class="stat"><span>Level:</span> <strong id="resLevel">-</strong></div>
@@ -210,7 +169,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
