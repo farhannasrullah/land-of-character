@@ -131,6 +131,11 @@ app.get("/api/player/:userId", async (req, res) => {
       scoreMagic,
       scoreKind,
       scoreTrust,
+      scoreTTS_Time,
+      scoreTTS_Truth,
+      scoreTTS_Kind,
+      scoreTTS_Trust,
+      scoreTTS_Magic,
     ] = await Promise.all([
       fetchRobloxUsername(userId),
       fetchRobloxAvatar(userId),
@@ -141,6 +146,11 @@ app.get("/api/player/:userId", async (req, res) => {
       fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Magic`),
       fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Kind`),
       fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Trust`),
+      fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_TTS_Time`),
+      fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_TTS_Truth`),
+      fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_TTS_Kind`),
+      fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_TTS_Trust`),
+      fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_TTS_Magic`),
     ]);
 
     res.json({
@@ -156,6 +166,11 @@ app.get("/api/player/:userId", async (req, res) => {
         Magic: scoreMagic,
         Kind: scoreKind,
         Trust: scoreTrust,
+        TTS_Time: scoreTTS_Time,
+        TTS_Truth: scoreTTS_Truth,
+        TTS_Kind: scoreTTS_Kind,
+        TTS_Trust: scoreTTS_Trust,
+        TTS_Magic: scoreTTS_Magic,
       },
     });
   } catch (error) {

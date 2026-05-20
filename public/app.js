@@ -240,16 +240,23 @@ async function openPlayerDetail(userId) {
     document.getElementById("resLevel").textContent = displayValue(eco, "Level");
     document.getElementById("resStreak").textContent = displayValue(eco, "LoginStreak");
 
-    // sesuai struktur baru: di profile datastore
     document.getElementById("resSchool").textContent = displayValue(profile, "School");
     document.getElementById("resClass").textContent = displayValue(profile, "Class");
     document.getElementById("resRpName").textContent = displayValue(profile, "RPName");
 
+    // Quiz Scores
     document.getElementById("scoreTruth").textContent = displayValue(scores, "Truth");
     document.getElementById("scoreTime").textContent = displayValue(scores, "Time");
     document.getElementById("scoreMagic").textContent = displayValue(scores, "Magic");
     document.getElementById("scoreKind").textContent = displayValue(scores, "Kind");
     document.getElementById("scoreTrust").textContent = displayValue(scores, "Trust");
+
+    // TTS Scores
+    document.getElementById("scoreTTS_Truth").textContent = displayValue(scores, "TTS_Truth");
+    document.getElementById("scoreTTS_Time").textContent = displayValue(scores, "TTS_Time");
+    document.getElementById("scoreTTS_Magic").textContent = displayValue(scores, "TTS_Magic");
+    document.getElementById("scoreTTS_Kind").textContent = displayValue(scores, "TTS_Kind");
+    document.getElementById("scoreTTS_Trust").textContent = displayValue(scores, "TTS_Trust");
 
     modalLoading.style.display = "none";
     modalData.style.display = "block";
