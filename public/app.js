@@ -1,11 +1,29 @@
 // --- BANTUAN UI ---
 function displayValue(val, property) {
   if (val === null || val === undefined) return "-";
+
   if (typeof val === "object" && property) {
-    const exactKey = Object.keys(val).find(k => k.toLowerCase() === property.toLowerCase());
+    const exactKey = Object.keys(val).find(
+      k => k.toLowerCase() === property.toLowerCase()
+    );
     return exactKey ? val[exactKey] : "-";
   }
+
   return val;
+}
+
+function getNumericValue(val, fallback = 0) {
+  const n = Number(val);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 const modal = document.getElementById("playerModal");
@@ -16,8 +34,13 @@ const usersToolbar = document.getElementById("usersToolbar");
 const colRank = document.getElementById("colRank");
 const lbValueHeader = document.getElementById("lbValueHeader");
 
-function closeModal() { modal.style.display = "none"; }
-window.onclick = function(event) { if (event.target == modal) closeModal(); }
+function closeModal() {
+  modal.style.display = "none";
+}
+
+window.onclick = function (event) {
+  if (event.target == modal) closeModal();
+};
 
 function setActiveTab(tabId) {
   ["btnUsers", "btnLevel", "btnCoins", "btnScore"].forEach(id => {
@@ -27,8 +50,38 @@ function setActiveTab(tabId) {
 }
 
 // --- STATE MANAGEMENT ---
-let cachedAllUsers = []; 
+let cachedAllUsers = [];
 let currentMode = "users"; // "users" atau "leaderboard"
+
+// helper untuk fetch JSON yang lebih aman
+async function fetchJsonSafe(url) {
+  const response = await fetch(url);
+  const text = await response.text();
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (err) {
+    console.error("Response bukan JSON:", text);
+    throw new Error("Server tidak mengembalikan JSON valid");
+  }
+
+  if (!response.ok) {
+    throw new Error(data?.error || "Request gagal");
+  }
+
+  return data;
+}
+
+function currentSearchQuery() {
+  const el = document.getElementById("searchInput");
+  return (el?.value || "").toLowerCase();
+}
+
+function currentSortMethod() {
+  const el = document.getElementById("sortSelect");
+  return el?.value || "name-asc";
+}
 
 // --- FETCH SEMUA PEMAIN ---
 async function loadAllUsers() {
@@ -46,38 +99,42 @@ async function loadAllUsers() {
   tbody.innerHTML = `<tr><td colspan="6" class="loader">MENARIK DAFTAR SEMUA PEMAIN...</td></tr>`;
 
   try {
-    const response = await fetch(`/api/users`);
-    const data = await response.json();
-    if (!response.ok) throw new Error("Gagal mengambil data pemain.");
-    
-    cachedAllUsers = data;
+    const data = await fetchJsonSafe("/api/users");
+    cachedAllUsers = Array.isArray(data) ? data : [];
     filterAndSortUsers();
   } catch (error) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#ff4d4d;">Error: ${error.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#ff4d4d;">Error: ${escapeHtml(error.message)}</td></tr>`;
   }
 }
 
 // --- FILTER & SORT LOGIC ---
 function filterAndSortUsers() {
-  const query = document.getElementById("searchInput").value.toLowerCase();
-  const sortMethod = document.getElementById("sortSelect").value;
+  const query = currentSearchQuery();
+  const sortMethod = currentSortMethod();
 
-  // Filter Search
   let filtered = cachedAllUsers.filter(u => {
     const un = (u.username || "").toLowerCase();
     const dn = (u.displayName || "").toLowerCase();
     const rp = (u.rpName || "").toLowerCase();
     const sc = (u.school || "").toLowerCase();
-    return un.includes(query) || dn.includes(query) || rp.includes(query) || sc.includes(query);
+    const cl = (u.class || "").toLowerCase();
+
+    return (
+      un.includes(query) ||
+      dn.includes(query) ||
+      rp.includes(query) ||
+      sc.includes(query) ||
+      cl.includes(query)
+    );
   });
 
-  // Sort
   filtered.sort((a, b) => {
-    if (sortMethod === 'name-asc') return a.username.localeCompare(b.username);
-    if (sortMethod === 'name-desc') return b.username.localeCompare(a.username);
-    if (sortMethod === 'rp-asc') return (a.rpName === "-" ? "zz" : a.rpName).localeCompare((b.rpName === "-" ? "zz" : b.rpName));
-    if (sortMethod === 'school-asc') return (a.school === "-" ? "zz" : a.school).localeCompare((b.school === "-" ? "zz" : b.school));
-    if (sortMethod === 'level-desc') return (b.level || 0) - (a.level || 0);
+    if (sortMethod === "name-asc") return (a.username || "").localeCompare(b.username || "");
+    if (sortMethod === "name-desc") return (b.username || "").localeCompare(a.username || "");
+    if (sortMethod === "rp-asc") return (a.rpName === "-" ? "zz" : (a.rpName || "")).localeCompare(b.rpName === "-" ? "zz" : (b.rpName || ""));
+    if (sortMethod === "school-asc") return (a.school === "-" ? "zz" : (a.school || "")).localeCompare(b.school === "-" ? "zz" : (b.school || ""));
+    if (sortMethod === "class-asc") return (a.class === "-" ? "zz" : (a.class || "")).localeCompare(b.class === "-" ? "zz" : (b.class || ""));
+    if (sortMethod === "level-desc") return getNumericValue(b.level) - getNumericValue(a.level);
     return 0;
   });
 
@@ -90,7 +147,7 @@ document.getElementById("sortSelect").addEventListener("change", filterAndSortUs
 
 // --- FETCH LEADERBOARD ---
 async function loadLeaderboard(type) {
-  let tabId = "btn" + type.charAt(0).toUpperCase() + type.slice(1);
+  const tabId = "btn" + type.charAt(0).toUpperCase() + type.slice(1);
   setActiveTab(tabId);
   currentMode = "leaderboard";
   usersToolbar.style.display = "none";
@@ -103,29 +160,26 @@ async function loadLeaderboard(type) {
   tbody.innerHTML = `<tr><td colspan="6" class="loader">MEMUAT LEADERBOARD...</td></tr>`;
 
   try {
-    const response = await fetch(`/api/leaderboard/${type}`);
-    const data = await response.json();
-    if (!response.ok) throw new Error("Gagal mengambil leaderboard");
-    
-    renderTable(data, true);
+    const data = await fetchJsonSafe(`/api/leaderboard/${type}`);
+    renderTable(Array.isArray(data) ? data : [], true);
   } catch (error) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#ff4d4d;">Error: ${error.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#ff4d4d;">Error: ${escapeHtml(error.message)}</td></tr>`;
   }
 }
 
 // --- RENDER TABEL (REUSABLE) ---
 function renderTable(dataArray, isLeaderboard) {
-  if (dataArray.length === 0) {
+  if (!Array.isArray(dataArray) || dataArray.length === 0) {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">Tidak ada data yang cocok.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = "";
+
   dataArray.forEach((player, index) => {
     const tr = document.createElement("tr");
     tr.className = "data-row";
-    
-    // Index atau Rank Number
+
     let rankHtml = `<td class="idx-col">${index + 1}</td>`;
     if (isLeaderboard) {
       if (player.rank === 1) rankHtml = `<td style="color:#ffd700; font-weight:bold; font-size:16px;">#1</td>`;
@@ -134,25 +188,31 @@ function renderTable(dataArray, isLeaderboard) {
       else rankHtml = `<td class="idx-col">#${player.rank}</td>`;
     }
 
-    const avatarSrc = player.avatar ? player.avatar : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='45' height='45' fill='%2327272a'><rect width='100%' height='100%'/></svg>";
+    const avatarSrc = player.avatar
+      ? player.avatar
+      : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='45' height='45' fill='%2327272a'><rect width='100%' height='100%'/></svg>";
+
+    const valueToShow = isLeaderboard
+      ? getNumericValue(player.value)
+      : getNumericValue(player.level);
 
     tr.innerHTML = `
       ${rankHtml}
       <td>
         <div class="avatar-cell">
-          <img src="${avatarSrc}" class="avatar-img" alt="Ava">
+          <img src="${escapeHtml(avatarSrc)}" class="avatar-img" alt="Ava">
           <div>
-            <div style="font-weight: bold; color: #fff;">${player.displayName}</div>
-            <div style="font-size: 12px; color: var(--text-muted); font-family: monospace;">@${player.username}</div>
+            <div style="font-weight: bold; color: #fff;">${escapeHtml(player.displayName || "Unknown")}</div>
+            <div style="font-size: 12px; color: var(--text-muted); font-family: monospace;">@${escapeHtml(player.username || "unknown")}</div>
           </div>
         </div>
       </td>
-      <td style="font-weight: 500;">${player.rpName}</td>
-      <td>${player.school}</td>
-      <td>${player.class}</td>
-      <td style="text-align: right;" class="val-highlight">${(player.value || player.level).toLocaleString('id-ID')}</td>
+      <td style="font-weight: 500;">${escapeHtml(player.rpName || "-")}</td>
+      <td>${escapeHtml(player.school || "-")}</td>
+      <td>${escapeHtml(player.class || "-")}</td>
+      <td style="text-align: right;" class="val-highlight">${valueToShow.toLocaleString("id-ID")}</td>
     `;
-    
+
     tr.onclick = () => openPlayerDetail(player.userId);
     tbody.appendChild(tr);
   });
@@ -165,30 +225,31 @@ async function openPlayerDetail(userId) {
   modalData.style.display = "none";
 
   try {
-    const response = await fetch(`/api/player/${userId}`);
-    const data = await response.json();
+    const data = await fetchJsonSafe(`/api/player/${userId}`);
 
-    if (!response.ok) throw new Error("Data tidak ditemukan");
-
-    document.getElementById("modAvatar").src = data.RobloxAccount.avatar || "";
-    document.getElementById("modDisplayName").textContent = data.RobloxAccount.displayName;
-    document.getElementById("modUsername").textContent = data.RobloxAccount.name;
+    document.getElementById("modAvatar").src = data.RobloxAccount?.avatar || "";
+    document.getElementById("modDisplayName").textContent = data.RobloxAccount?.displayName || "Unknown";
+    document.getElementById("modUsername").textContent = data.RobloxAccount?.name || "unknown";
     document.getElementById("modUserId").textContent = userId;
 
-    const eco = data.RoleplayEcoDB_V4;
+    const eco = data.RoleplayEcoDB_V4 || {};
+    const profile = data.RoleplayProfileDB_V3 || {};
+    const scores = data.Scores || {};
+
     document.getElementById("resCoins").textContent = displayValue(eco, "Coins");
     document.getElementById("resLevel").textContent = displayValue(eco, "Level");
     document.getElementById("resStreak").textContent = displayValue(eco, "LoginStreak");
-    document.getElementById("resSchool").textContent = displayValue(eco, "School");
-    document.getElementById("resClass").textContent = displayValue(eco, "Class");
 
-    document.getElementById("resRpName").textContent = displayValue(data.RoleplayProfileDB_V3);
+    // sesuai struktur baru: di profile datastore
+    document.getElementById("resSchool").textContent = displayValue(profile, "School");
+    document.getElementById("resClass").textContent = displayValue(profile, "Class");
+    document.getElementById("resRpName").textContent = displayValue(profile, "RPName");
 
-    document.getElementById("scoreTruth").textContent = displayValue(data.Scores.Truth);
-    document.getElementById("scoreTime").textContent = displayValue(data.Scores.Time);
-    document.getElementById("scoreMagic").textContent = displayValue(data.Scores.Magic);
-    document.getElementById("scoreKind").textContent = displayValue(data.Scores.Kind);
-    document.getElementById("scoreTrust").textContent = displayValue(data.Scores.Trust);
+    document.getElementById("scoreTruth").textContent = displayValue(scores, "Truth");
+    document.getElementById("scoreTime").textContent = displayValue(scores, "Time");
+    document.getElementById("scoreMagic").textContent = displayValue(scores, "Magic");
+    document.getElementById("scoreKind").textContent = displayValue(scores, "Kind");
+    document.getElementById("scoreTrust").textContent = displayValue(scores, "Trust");
 
     modalLoading.style.display = "none";
     modalData.style.display = "block";
@@ -199,12 +260,13 @@ async function openPlayerDetail(userId) {
 
 // Event Pencarian Manual Spesifik ID
 document.getElementById("manualSearchBtn").addEventListener("click", () => {
-  const userId = document.getElementById("manualUserId").value;
+  const userId = document.getElementById("manualUserId").value.trim();
   if (userId) openPlayerDetail(userId);
 });
+
 document.getElementById("manualUserId").addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
-    const userId = document.getElementById("manualUserId").value;
+    const userId = document.getElementById("manualUserId").value.trim();
     if (userId) openPlayerDetail(userId);
   }
 });

@@ -4,8 +4,10 @@ const cors = require("cors");
 const path = require("path");
 
 const app = express();
+
 app.use(cors());
-app.use(express.static(path.join(__dirname, "public"))); 
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
 const ROBLOX_API_KEY = process.env.ROBLOX_API_KEY;
 const UNIVERSE_ID = process.env.UNIVERSE_ID;
@@ -13,17 +15,27 @@ const UNIVERSE_ID = process.env.UNIVERSE_ID;
 // ==========================================
 // KONFIGURASI BEBAN SERVER
 // ==========================================
-// Atur berapa maksimal data pemain yang ditarik sekaligus di tab "Semua Pemain"
-// Semakin kecil angkanya, semakin ringan dan cepat server memprosesnya.
-const MAX_USERS_FETCH = 100; 
+const MAX_USERS_FETCH = 100;
 // ==========================================
+
+function getEntryUserId(entry) {
+  return String(entry?.key ?? entry?.id ?? "");
+}
 
 async function fetchRobloxUsername(userId) {
   try {
     const response = await fetch(`https://users.roblox.com/v1/users/${userId}`);
-    if (!response.ok) return { name: "Unknown", displayName: "Unknown" };
+
+    if (!response.ok) {
+      return { name: "Unknown", displayName: "Unknown" };
+    }
+
     const data = await response.json();
-    return { name: data.name, displayName: data.displayName };
+
+    return {
+      name: data.name || "Unknown",
+      displayName: data.displayName || "Unknown",
+    };
   } catch (error) {
     return { name: "Unknown", displayName: "Unknown" };
   }
@@ -31,11 +43,18 @@ async function fetchRobloxUsername(userId) {
 
 async function fetchRobloxAvatar(userId) {
   try {
-    const response = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
+    const response = await fetch(
+      `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`
+    );
+
+    if (!response.ok) return "";
+
     const data = await response.json();
+
     if (data && data.data && data.data.length > 0) {
-      return data.data[0].imageUrl;
+      return data.data[0].imageUrl || "";
     }
+
     return "";
   } catch (error) {
     return "";
@@ -43,55 +62,114 @@ async function fetchRobloxAvatar(userId) {
 }
 
 async function fetchRobloxData(datastoreName, entryKey) {
-  const url = `https://apis.roblox.com/datastores/v1/universes/${UNIVERSE_ID}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&entryKey=${entryKey}`;
+  const url = `https://apis.roblox.com/datastores/v1/universes/${UNIVERSE_ID}/standard-datastores/datastore/entries/entry?datastoreName=${encodeURIComponent(
+    datastoreName
+  )}&entryKey=${encodeURIComponent(String(entryKey))}`;
+
   try {
-    const response = await fetch(url, { method: "GET", headers: { "x-api-key": ROBLOX_API_KEY } });
-    if (response.status === 404) return null; 
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "x-api-key": ROBLOX_API_KEY,
+      },
+    });
+
+    if (response.status === 404) return null;
     if (!response.ok) throw new Error(`Status: ${response.status}`);
+
     return await response.json();
   } catch (error) {
     return null;
   }
 }
 
-// [ENDPOINT 1] Pencarian Spesifik Berdasarkan User ID
+// ==========================================
+// ECO DATA
+// ==========================================
+
+async function fetchEcoSmart(userId) {
+  let data = await fetchRobloxData("RoleplayEcoDB_V4", String(userId));
+  if (!data) {
+    data = await fetchRobloxData("RoleplayEcoDB_V4", `Player_${userId}`);
+  }
+  return data;
+}
+
+// ==========================================
+// PROFILE DATA
+// ==========================================
+
+async function fetchProfileData(userId) {
+  const [rpName, school, className] = await Promise.all([
+    fetchRobloxData("RoleplayProfileDB_V3", `${userId}_RPName`),
+    fetchRobloxData("RoleplayProfileDB_V3", `${userId}_School`),
+    fetchRobloxData("RoleplayProfileDB_V3", `${userId}_Class`),
+  ]);
+
+  return {
+    rpName: rpName || "-",
+    school: school || "-",
+    class: className || "-",
+  };
+}
+
+// ==========================================
+// ENDPOINT 1: PLAYER DETAIL
+// ==========================================
+
 app.get("/api/player/:userId", async (req, res) => {
-  const userId = req.params.userId;
+  const userId = String(req.params.userId);
 
   try {
-    const fetchEcoSmart = async () => {
-      let data = await fetchRobloxData("RoleplayEcoDB_V4", `Player_${userId}`);
-      if (!data) data = await fetchRobloxData("RoleplayEcoDB_V4", userId);
-      return data;
-    };
-
     const [
-      robloxUser, avatarUrl, ecoData, profileData,
-      scoreTruth, scoreTime, scoreMagic, scoreKind, scoreTrust
+      robloxUser,
+      avatarUrl,
+      ecoData,
+      profileData,
+      scoreTruth,
+      scoreTime,
+      scoreMagic,
+      scoreKind,
+      scoreTrust,
     ] = await Promise.all([
       fetchRobloxUsername(userId),
       fetchRobloxAvatar(userId),
-      fetchEcoSmart(),
-      fetchRobloxData("RoleplayProfileDB_V3", `${userId}_RPName`),
+      fetchEcoSmart(userId),
+      fetchProfileData(userId),
       fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Truth`),
       fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Time`),
       fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Magic`),
       fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Kind`),
-      fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Trust`)
+      fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Trust`),
     ]);
 
     res.json({
-      RobloxAccount: { ...robloxUser, avatar: avatarUrl },
+      RobloxAccount: {
+        ...robloxUser,
+        avatar: avatarUrl,
+      },
       RoleplayEcoDB_V4: ecoData,
       RoleplayProfileDB_V3: profileData,
-      Scores: { Truth: scoreTruth, Time: scoreTime, Magic: scoreMagic, Kind: scoreKind, Trust: scoreTrust }
+      Scores: {
+        Truth: scoreTruth,
+        Time: scoreTime,
+        Magic: scoreMagic,
+        Kind: scoreKind,
+        Trust: scoreTrust,
+      },
     });
   } catch (error) {
-    res.status(500).json({ error: "Terjadi kesalahan internal server." });
+    console.error("[/api/player] Error:", error);
+    res.status(500).json({
+      error: "Terjadi kesalahan internal server.",
+    });
   }
 });
 
-// [ENDPOINT 2] Leaderboard Kategori Lengkap (Max 50 Top Player)
+// ==========================================
+// ENDPOINT 2: LEADERBOARD
+// ==========================================
+
 app.get("/api/leaderboard/:type", async (req, res) => {
   const type = req.params.type;
   let odsName = "";
@@ -104,91 +182,124 @@ app.get("/api/leaderboard/:type", async (req, res) => {
   const url = `https://apis.roblox.com/ordered-data-stores/v1/universes/${UNIVERSE_ID}/orderedDataStores/${odsName}/scopes/global/entries?max_page_size=50&order_by=desc`;
 
   try {
-    const response = await fetch(url, { method: "GET", headers: { "x-api-key": ROBLOX_API_KEY } });
-    if (response.status === 404) return res.json([]); 
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "x-api-key": ROBLOX_API_KEY,
+      },
+    });
+
+    if (response.status === 404) return res.json([]);
     if (!response.ok) throw new Error(`Status ${response.status}`);
-    
+
     const data = await response.json();
-    if (!data.entries) return res.json([]); 
+    if (!data.entries) return res.json([]);
 
     const leaderboardData = await Promise.all(
       data.entries.map(async (entry, index) => {
-        const userId = entry.id;
+        const userId = getEntryUserId(entry);
+        if (!userId) {
+          return null;
+        }
+
         const [user, avatar, profile, eco] = await Promise.all([
           fetchRobloxUsername(userId),
           fetchRobloxAvatar(userId),
-          fetchRobloxData("RoleplayProfileDB_V3", `${userId}_RPName`),
-          fetchRobloxData("RoleplayEcoDB_V4", `Player_${userId}`).then(res => res || fetchRobloxData("RoleplayEcoDB_V4", userId))
+          fetchProfileData(userId),
+          fetchEcoSmart(userId),
         ]);
 
         return {
           rank: index + 1,
-          userId: userId,
+          userId,
           username: user.name || "Unknown",
           displayName: user.displayName || "Unknown",
-          avatar: avatar,
+          avatar,
           value: entry.value,
-          rpName: profile || "-",
-          school: eco?.School || eco?.school || "-",
-          class: eco?.Class || eco?.class || "-",
-          level: eco?.Level || eco?.level || 1
+          rpName: profile.rpName || "-",
+          school: profile.school || "-",
+          class: profile.class || "-",
+          level: eco?.Level || eco?.level || 1,
         };
       })
     );
 
-    res.json(leaderboardData);
+    res.json(leaderboardData.filter(Boolean));
   } catch (error) {
-    res.status(500).json({ error: "Gagal mengambil leaderboard." });
+    console.error("[/api/leaderboard] Error:", error);
+    res.status(500).json({
+      error: "Gagal mengambil leaderboard.",
+    });
   }
 });
 
-// [ENDPOINT 3] Semua Pemain (Max ditentukan oleh MAX_USERS_FETCH)
+// ==========================================
+// ENDPOINT 3: ALL USERS
+// ==========================================
+
 app.get("/api/users", async (req, res) => {
-  // Disini kita gunakan variabel konfigurasi MAX_USERS_FETCH
   const url = `https://apis.roblox.com/ordered-data-stores/v1/universes/${UNIVERSE_ID}/orderedDataStores/Leaderboard_Level/scopes/global/entries?max_page_size=${MAX_USERS_FETCH}&order_by=desc`;
 
   try {
-    const response = await fetch(url, { method: "GET", headers: { "x-api-key": ROBLOX_API_KEY } });
-    if (response.status === 404) return res.json([]); 
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "x-api-key": ROBLOX_API_KEY,
+      },
+    });
+
+    if (response.status === 404) return res.json([]);
     if (!response.ok) throw new Error(`Status ${response.status}`);
-    
+
     const data = await response.json();
-    if (!data.entries) return res.json([]); 
+    if (!data.entries) return res.json([]);
 
     const usersData = await Promise.all(
       data.entries.map(async (entry) => {
-        const userId = entry.id;
+        const userId = getEntryUserId(entry);
+        if (!userId) {
+          return null;
+        }
+
         const [user, avatar, profile, eco] = await Promise.all([
           fetchRobloxUsername(userId),
           fetchRobloxAvatar(userId),
-          fetchRobloxData("RoleplayProfileDB_V3", `${userId}_RPName`),
-          fetchRobloxData("RoleplayEcoDB_V4", `Player_${userId}`).then(res => res || fetchRobloxData("RoleplayEcoDB_V4", userId))
+          fetchProfileData(userId),
+          fetchEcoSmart(userId),
         ]);
 
         return {
-          userId: userId,
+          userId,
           username: user.name || "Unknown",
           displayName: user.displayName || "Unknown",
-          avatar: avatar,
-          value: entry.value, 
-          rpName: profile || "-",
-          school: eco?.School || eco?.school || "-",
-          class: eco?.Class || eco?.class || "-",
-          level: eco?.Level || eco?.level || 1
+          avatar,
+          value: entry.value,
+          rpName: profile.rpName || "-",
+          school: profile.school || "-",
+          class: profile.class || "-",
+          level: eco?.Level || eco?.level || 1,
         };
       })
     );
 
-    res.json(usersData);
+    res.json(usersData.filter(Boolean));
   } catch (error) {
-    res.status(500).json({ error: "Gagal mengambil daftar pemain." });
+    console.error("[/api/users] Error:", error);
+    res.status(500).json({
+      error: "Gagal mengambil daftar pemain.",
+    });
   }
 });
 
+// ==========================================
+// START SERVER
+// ==========================================
+
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log(`=================================`);
+  console.log("=================================");
   console.log(`Server Monitoring Aktif: Port ${PORT}`);
   console.log(`MAX_USERS_FETCH disetel ke: ${MAX_USERS_FETCH} pemain`);
-  console.log(`=================================`);
+  console.log("=================================");
 });
