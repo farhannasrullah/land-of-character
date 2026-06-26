@@ -1,14 +1,23 @@
-// --- BANTUAN UI ---
+/**
+ * =========================================================================
+ * LAND OF CHARACTER - EXECUTIVE DASHBOARD CORE LOGIC
+ * =========================================================================
+ * Deskripsi : Handler untuk Fetching DB, Data Parsing, Sorting, & UI State
+ * Architecture: Vanilla JS + DOM Manipulation (Tailwind Utility Classes)
+ * =========================================================================
+ */
+
+// --- UTILITIES & HELPERS ---
 function displayValue(val, property) {
   if (val === null || val === undefined) return "-";
-
+  
   if (typeof val === "object" && property) {
     const exactKey = Object.keys(val).find(
       k => k.toLowerCase() === property.toLowerCase()
     );
     return exactKey ? val[exactKey] : "-";
   }
-
+  
   return val;
 }
 
@@ -26,6 +35,7 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
+// --- DOM REFERENCES ---
 const modal = document.getElementById("playerModal");
 const modalLoading = document.getElementById("modalLoading");
 const modalData = document.getElementById("modalData");
@@ -34,46 +44,50 @@ const usersToolbar = document.getElementById("usersToolbar");
 const colRank = document.getElementById("colRank");
 const lbValueHeader = document.getElementById("lbValueHeader");
 
+// --- MODAL CONTROLS ---
 function closeModal() {
-  modal.style.display = "none";
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+  document.body.style.overflow = ''; // Mengembalikan scroll body
 }
 
+// Tutup modal jika mengklik area luar modal (backdrop)
 window.onclick = function (event) {
   if (event.target == modal) closeModal();
 };
 
+// --- TAB STATE MANAGEMENT ---
 function setActiveTab(tabId) {
-  ["btnUsers", "btnLevel", "btnCoins", "btnScore"].forEach(id => {
-    document.getElementById(id).classList.remove("active");
+  // Reset semua tab ke state default (inactive)
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.classList.remove("active", "border-brand-500", "text-brand-600", "dark:text-brand-400");
+    btn.classList.add("border-gray-200", "dark:border-industrial-700", "text-gray-600", "dark:text-gray-400");
   });
-  document.getElementById(tabId).classList.add("active");
+  
+  // Set tab terpilih ke state active
+  const activeBtn = document.getElementById(tabId);
+  if (activeBtn) {
+    activeBtn.classList.add("active", "border-brand-500", "text-brand-600", "dark:text-brand-400");
+    activeBtn.classList.remove("border-gray-200", "dark:border-industrial-700", "text-gray-600", "dark:text-gray-400");
+  }
 }
 
-// --- TEMA (LIGHT/DARK MODE TOGGLE) ---
+// --- THEME TOGGLE (DARK/LIGHT MODE) ---
 const themeToggleBtn = document.getElementById("themeToggleBtn");
 if (themeToggleBtn) {
   themeToggleBtn.addEventListener("click", () => {
-    const root = document.documentElement;
-    const currentTheme = root.getAttribute("data-theme");
-    
-    // Logika ganti tema
-    const newTheme = currentTheme === "light" ? "dark" : "light";
-    
-    if (newTheme === "dark") {
-      root.removeAttribute("data-theme");
-      localStorage.setItem("theme", "dark");
-    } else {
-      root.setAttribute("data-theme", "light");
-      localStorage.setItem("theme", "light");
-    }
+    const html = document.documentElement;
+    html.classList.toggle('dark');
+    // Simpan preferensi tema di LocalStorage
+    localStorage.setItem("theme", html.classList.contains('dark') ? 'dark' : 'light');
   });
 }
 
-// --- STATE MANAGEMENT ---
+// --- DATA STATE ---
 let cachedAllUsers = [];
 let currentMode = "users";
 
-// helper untuk fetch JSON yang lebih aman
+// Wrapper Fetch dengan error handling JSON
 async function fetchJsonSafe(url) {
   const response = await fetch(url);
   const text = await response.text();
@@ -83,51 +97,54 @@ async function fetchJsonSafe(url) {
     data = JSON.parse(text);
   } catch (err) {
     console.error("Response bukan JSON:", text);
-    throw new Error("Server tidak mengembalikan JSON valid");
+    throw new Error("Server tidak mengembalikan format JSON yang valid");
   }
 
   if (!response.ok) {
-    throw new Error(data?.error || "Request gagal");
+    throw new Error(data?.error || "Gagal melakukan request ke server");
   }
 
   return data;
 }
 
+// Helper untuk membaca input pencarian/sorting saat ini
 function currentSearchQuery() {
-  const el = document.getElementById("searchInput");
-  return (el?.value || "").toLowerCase();
+  return (document.getElementById("searchInput")?.value || "").toLowerCase();
 }
 
 function currentSortMethod() {
-  const el = document.getElementById("sortSelect");
-  return el?.value || "name-asc";
+  return document.getElementById("sortSelect")?.value || "name-asc";
 }
 
-// --- FETCH SEMUA PEMAIN ---
+// --- FETCH & RENDER: SEMUA PEMAIN ---
 async function loadAllUsers() {
   setActiveTab("btnUsers");
   currentMode = "users";
-  usersToolbar.style.display = "flex";
+  
+  // Tampilkan toolbar pencarian
+  usersToolbar.classList.remove("hidden");
+  usersToolbar.classList.add("flex");
   colRank.textContent = "ID";
   lbValueHeader.textContent = "Level";
 
+  // Gunakan cache jika data sudah ditarik sebelumnya
   if (cachedAllUsers.length > 0) {
     filterAndSortUsers();
     return;
   }
 
-  tbody.innerHTML = `<tr><td colspan="6" class="loader">MENARIK DAFTAR SEMUA PEMAIN...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-brand-500 font-mono loader">[ PULLING MASTER ROSTER... ]</td></tr>`;
 
   try {
     const data = await fetchJsonSafe("/api/users");
     cachedAllUsers = Array.isArray(data) ? data : [];
     filterAndSortUsers();
   } catch (error) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--danger); border: 1px dashed var(--danger);">System Error: ${escapeHtml(error.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500 font-mono bg-red-500/10">ERR: ${escapeHtml(error.message)}</td></tr>`;
   }
 }
 
-// --- FILTER & SORT LOGIC ---
+// --- FILTER & SORTING LOGIC ---
 function filterAndSortUsers() {
   const query = currentSearchQuery();
   const sortMethod = currentSortMethod();
@@ -161,35 +178,39 @@ function filterAndSortUsers() {
   renderTable(filtered, false);
 }
 
-document.getElementById("searchInput").addEventListener("input", filterAndSortUsers);
-document.getElementById("sortSelect").addEventListener("change", filterAndSortUsers);
+// Attach event listeners untuk pencarian live
+document.getElementById("searchInput")?.addEventListener("input", filterAndSortUsers);
+document.getElementById("sortSelect")?.addEventListener("change", filterAndSortUsers);
 
-// --- FETCH LEADERBOARD ---
+// --- FETCH & RENDER: LEADERBOARD ---
 async function loadLeaderboard(type) {
   const tabId = "btn" + type.charAt(0).toUpperCase() + type.slice(1);
   setActiveTab(tabId);
   currentMode = "leaderboard";
-  usersToolbar.style.display = "none";
+  
+  // Sembunyikan toolbar pencarian
+  usersToolbar.classList.add("hidden");
+  usersToolbar.classList.remove("flex");
   colRank.textContent = "Rank";
 
   if (type === "coins") lbValueHeader.textContent = "Total Coins";
   if (type === "level") lbValueHeader.textContent = "Player Level";
   if (type === "score") lbValueHeader.textContent = "Total Quiz Score";
 
-  tbody.innerHTML = `<tr><td colspan="6" class="loader">MEMUAT DATABASE...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-brand-500 font-mono loader">[ COMPILING LEADERBOARD... ]</td></tr>`;
 
   try {
     const data = await fetchJsonSafe(`/api/leaderboard/${type}`);
     renderTable(Array.isArray(data) ? data : [], true);
   } catch (error) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--danger); border: 1px dashed var(--danger);">System Error: ${escapeHtml(error.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500 font-mono bg-red-500/10">ERR: ${escapeHtml(error.message)}</td></tr>`;
   }
 }
 
-// --- RENDER TABEL (REUSABLE) ---
+// --- RENDER TABLE ENGINE ---
 function renderTable(dataArray, isLeaderboard) {
   if (!Array.isArray(dataArray) || dataArray.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">0 Records Found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-500 font-mono">0 Records Found.</td></tr>`;
     return;
   }
 
@@ -197,16 +218,18 @@ function renderTable(dataArray, isLeaderboard) {
 
   dataArray.forEach((player, index) => {
     const tr = document.createElement("tr");
-    tr.className = "data-row";
+    tr.className = "hover:bg-gray-50 dark:hover:bg-industrial-700/50 cursor-pointer transition-colors";
 
-    let rankHtml = `<td class="idx-col">${index + 1}</td>`;
+    // Ranking Styling
+    let rankHtml = `<td class="px-6 py-4 font-mono text-gray-500 dark:text-gray-400 font-bold">${index + 1}</td>`;
     if (isLeaderboard) {
-      if (player.rank === 1) rankHtml = `<td class="idx-col rank-1">#1</td>`;
-      else if (player.rank === 2) rankHtml = `<td class="idx-col rank-2">#2</td>`;
-      else if (player.rank === 3) rankHtml = `<td class="idx-col rank-3">#3</td>`;
-      else rankHtml = `<td class="idx-col">#${player.rank}</td>`;
+      if (player.rank === 1) rankHtml = `<td class="px-6 py-4 font-mono text-yellow-500 font-black text-lg">#1</td>`;
+      else if (player.rank === 2) rankHtml = `<td class="px-6 py-4 font-mono text-gray-400 font-bold text-md">#2</td>`;
+      else if (player.rank === 3) rankHtml = `<td class="px-6 py-4 font-mono text-amber-600 font-bold text-md">#3</td>`;
+      else rankHtml = `<td class="px-6 py-4 font-mono text-gray-500 font-semibold">#${player.rank}</td>`;
     }
 
+    // Fallback avatar kosong
     const avatarSrc = player.avatar
       ? player.avatar
       : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='45' height='45' fill='none'></svg>";
@@ -217,19 +240,19 @@ function renderTable(dataArray, isLeaderboard) {
 
     tr.innerHTML = `
       ${rankHtml}
-      <td>
-        <div class="avatar-cell">
-          <img src="${escapeHtml(avatarSrc)}" class="avatar-img" alt="Ava">
+      <td class="px-6 py-4">
+        <div class="flex items-center gap-4">
+          <img src="${escapeHtml(avatarSrc)}" class="w-10 h-10 rounded-md border border-gray-200 dark:border-industrial-600 object-cover bg-gray-100 dark:bg-industrial-800" alt="Ava">
           <div>
-            <div style="font-weight: bold; color: var(--text);">${escapeHtml(player.displayName || "Unknown")}</div>
-            <div style="font-size: 12px; color: var(--text-muted); font-family: monospace;">@${escapeHtml(player.username || "unknown")}</div>
+            <div class="font-bold text-gray-900 dark:text-white">${escapeHtml(player.displayName || "Unknown")}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 font-mono">@${escapeHtml(player.username || "unknown")}</div>
           </div>
         </div>
       </td>
-      <td style="font-weight: 500;">${escapeHtml(player.rpName || "-")}</td>
-      <td>${escapeHtml(player.school || "-")}</td>
-      <td>${escapeHtml(player.class || "-")}</td>
-      <td style="text-align: right;" class="val-highlight">${valueToShow.toLocaleString("id-ID")}</td>
+      <td class="px-6 py-4 font-medium text-gray-700 dark:text-gray-300">${escapeHtml(player.rpName || "-")}</td>
+      <td class="px-6 py-4 text-gray-600 dark:text-gray-400 max-w-[150px] truncate">${escapeHtml(player.school || "-")}</td>
+      <td class="px-6 py-4 text-gray-600 dark:text-gray-400">${escapeHtml(player.class || "-")}</td>
+      <td class="px-6 py-4 text-right font-mono font-bold text-brand-600 dark:text-brand-400 text-lg">${valueToShow.toLocaleString("id-ID")}</td>
     `;
 
     tr.onclick = () => openPlayerDetail(player.userId);
@@ -237,26 +260,34 @@ function renderTable(dataArray, isLeaderboard) {
   });
 }
 
-// --- MODAL & PENCARIAN MANUAL ---
+// --- PLAYER DETAIL MODAL ENGINE ---
 async function openPlayerDetail(userId) {
-  modal.style.display = "flex";
-  modalLoading.style.display = "block";
-  modalData.style.display = "none";
+  // Buka Modal & Lock Scroll
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+  document.body.style.overflow = 'hidden'; 
+  
+  modalLoading.classList.remove("hidden");
+  modalLoading.classList.add("block");
+  modalData.classList.add("hidden");
 
   try {
     const data = await fetchJsonSafe(`/api/player/${userId}`);
 
+    // Set Identity
     document.getElementById("modAvatar").src = data.RobloxAccount?.avatar || "";
     document.getElementById("modDisplayName").textContent = data.RobloxAccount?.displayName || "Unknown";
     document.getElementById("modUsername").textContent = data.RobloxAccount?.name || "unknown";
     document.getElementById("modUserId").textContent = userId;
 
+    // Database Extractor
     const eco = data.RoleplayEcoDB_V4 || {};
     const profile = data.RoleplayProfileDB_V3 || {};
     const scores = data.Scores || {};
     const journey = data.JourneyLockDB_V1 || {};
     const reward = data.RoleplayRewardDB_V1 || {};
 
+    // Populate Economy & Profile
     document.getElementById("resCoins").textContent = displayValue(eco, "Coins");
     document.getElementById("resLevel").textContent = displayValue(eco, "Level");
     document.getElementById("resStreak").textContent = displayValue(eco, "LoginStreak");
@@ -266,7 +297,7 @@ async function openPlayerDetail(userId) {
     document.getElementById("resRpName").textContent = displayValue(profile, "rpName");
     document.getElementById("resGender").textContent = displayValue(profile, "gender");
 
-    // Journey
+    // Populate Journey
     document.getElementById("resActiveLock").textContent =
       journey.activeLock !== null && journey.activeLock !== undefined
         ? String(journey.activeLock)
@@ -276,7 +307,7 @@ async function openPlayerDetail(userId) {
         ? String(journey.j5Type)
         : "-";
 
-    // Reward - Parsing Progress Bar Data
+    // Parsing Reward / Progress Bar Logic
     const cq = reward.completedQuizzes;
     let quizzes = [];
     
@@ -286,7 +317,6 @@ async function openPlayerDetail(userId) {
       } else if (typeof cq === "object") {
         quizzes = Object.keys(cq);
       } else if (typeof cq === "string") {
-        // Handle jika data datang sebagai string panjang
         quizzes = cq.split(",");
       } else {
         quizzes = [String(cq)];
@@ -299,7 +329,6 @@ async function openPlayerDetail(userId) {
 
     quizzes.forEach(q => {
       const qName = String(q).trim();
-      // Pilah data mana yang Standard Quiz dan mana yang TTS
       if (qName.startsWith("Quiz_") || qName === "Quiz") {
         quizCount++;
       } else if (qName.startsWith("TTS_") || qName === "TTS") {
@@ -307,18 +336,17 @@ async function openPlayerDetail(userId) {
       }
     });
 
-    // Batasi hitungan supaya bar tidak tembus 100% jika ada duplikat entri dari Roblox
     quizCount = Math.min(quizCount, MAX_QUIZ);
     ttsCount = Math.min(ttsCount, MAX_QUIZ);
 
-    // Apply ke HTML
+    // Apply ke HTML Progress Bar
     document.getElementById("resQuizCount").textContent = `${quizCount}/${MAX_QUIZ}`;
     document.getElementById("resQuizFill").style.width = `${(quizCount / MAX_QUIZ) * 100}%`;
 
     document.getElementById("resTtsCount").textContent = `${ttsCount}/${MAX_QUIZ}`;
     document.getElementById("resTtsFill").style.width = `${(ttsCount / MAX_QUIZ) * 100}%`;
 
-    // Quiz & TTS Scores
+    // Populate Scores
     document.getElementById("scoreTruth").textContent = displayValue(scores, "Truth");
     document.getElementById("scoreTime").textContent = displayValue(scores, "Time");
     document.getElementById("scoreMagic").textContent = displayValue(scores, "Magic");
@@ -331,29 +359,36 @@ async function openPlayerDetail(userId) {
     document.getElementById("scoreTTS_Kind").textContent = displayValue(scores, "TTS_Kind");
     document.getElementById("scoreTTS_Trust").textContent = displayValue(scores, "TTS_Trust");
 
-    modalLoading.style.display = "none";
-    modalData.style.display = "block";
+    // Selesai Loading, tampilkan UI
+    modalLoading.classList.add("hidden");
+    modalLoading.classList.remove("block");
+    modalData.classList.remove("hidden");
+    
   } catch (error) {
-    modalLoading.textContent = "SYSTEM FAILURE: " + error.message;
+    modalLoading.innerHTML = `<span class="text-red-500">SYSTEM FAILURE: ${error.message}</span>`;
   }
 }
 
-// Event Pencarian Manual Spesifik ID
-document.getElementById("manualSearchBtn").addEventListener("click", () => {
+// --- EVENT LISTENERS PENCARIAN MANUAL ---
+document.getElementById("manualSearchBtn")?.addEventListener("click", () => {
   const userId = document.getElementById("manualUserId").value.trim();
   if (userId) openPlayerDetail(userId);
 });
 
-document.getElementById("manualUserId").addEventListener("keypress", (e) => {
+document.getElementById("manualUserId")?.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     const userId = document.getElementById("manualUserId").value.trim();
     if (userId) openPlayerDetail(userId);
   }
 });
 
-// INIT AWAL
+// --- INITIALIZATION ---
 window.addEventListener("DOMContentLoaded", () => {
+  // Panggil data pemain pertama kali dibuka
   loadAllUsers();
-  // Merender ikon SVG Lucide setelah DOM siap
-  lucide.createIcons();
+  
+  // Render SVG icons dari Lucide
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
 });
