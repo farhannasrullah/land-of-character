@@ -105,12 +105,12 @@
     <div id="usersToolbar" class="flex flex-col md:flex-row gap-2.5 md:gap-3 bg-white dark:bg-industrial-900 p-3 md:p-4 rounded-xl border border-gray-200 dark:border-industrial-700 shadow-sm hidden">
       <div class="relative flex-1">
         <i data-lucide="filter" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-        <input type="text" id="searchInput" placeholder="Filter Username, RP Name, Instansi..." class="w-full bg-gray-50 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg pl-9 pr-3 py-2 md:py-2.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+        <input type="text" id="searchInput" placeholder="Filter Username, Name, Instansi..." class="w-full bg-gray-50 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg pl-9 pr-3 py-2 md:py-2.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
       </div>
       <select id="sortSelect" class="w-full md:w-56 bg-gray-50 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg px-3 py-2 md:py-2.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 appearance-none cursor-pointer">
         <option value="name-asc">Username (A - Z)</option>
         <option value="name-desc">Username (Z - A)</option>
-        <option value="rp-asc">RP Name (A - Z)</option>
+        <option value="rp-asc">Name (A - Z)</option>
         <option value="school-asc">School (A - Z)</option>
         <option value="class-asc">Class (A - Z)</option>
         <option value="level-desc">Level Tertinggi</option>
@@ -124,7 +124,7 @@
             <tr>
               <th class="px-3 py-3 md:px-6 md:py-4" id="colRank">ID</th>
               <th class="px-3 py-3 md:px-6 md:py-4">Account</th>
-              <th class="px-3 py-3 md:px-6 md:py-4">RP Name</th>
+              <th class="px-3 py-3 md:px-6 md:py-4">Name</th>
               <th class="px-3 py-3 md:px-6 md:py-4">School</th>
               <th class="px-3 py-3 md:px-6 md:py-4">Class</th>
               <th class="px-3 py-3 md:px-6 md:py-4 text-right" id="lbValueHeader">Level</th>
@@ -167,7 +167,7 @@
               <i data-lucide="user" class="w-3.5 h-3.5"></i> Profile & Academic
             </div>
             <div class="space-y-2 md:space-y-3 text-xs md:text-sm">
-              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">RP Name</span> <strong id="resRpName" class="font-mono text-gray-900 dark:text-white"></strong></div>
+              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Name</span> <strong id="resRpName" class="font-mono text-gray-900 dark:text-white"></strong></div>
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Gender</span> <strong id="resGender" class="font-mono text-gray-900 dark:text-white"></strong></div>
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">School</span> <strong id="resSchool" class="font-mono text-gray-900 dark:text-white text-right break-words max-w-[120px] md:max-w-[150px]"></strong></div>
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Class</span> <strong id="resClass" class="font-mono text-gray-900 dark:text-white"></strong></div>
