@@ -208,9 +208,10 @@ async function loadLeaderboard(type) {
 }
 
 // --- RENDER TABLE ENGINE ---
+// --- RENDER TABLE ENGINE ---
 function renderTable(dataArray, isLeaderboard) {
   if (!Array.isArray(dataArray) || dataArray.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-500 font-mono">0 Records Found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="p-6 md:p-8 text-center text-gray-500 font-mono text-xs md:text-sm">0 Records Found.</td></tr>`;
     return;
   }
 
@@ -220,16 +221,15 @@ function renderTable(dataArray, isLeaderboard) {
     const tr = document.createElement("tr");
     tr.className = "hover:bg-gray-50 dark:hover:bg-industrial-700/50 cursor-pointer transition-colors";
 
-    // Ranking Styling
-    let rankHtml = `<td class="px-6 py-4 font-mono text-gray-500 dark:text-gray-400 font-bold">${index + 1}</td>`;
+    // PADDING DIKECILKAN: px-3 py-3 untuk mobile, md:px-6 md:py-4 untuk desktop
+    let rankHtml = `<td class="px-3 py-3 md:px-6 md:py-4 font-mono text-gray-500 dark:text-gray-400 font-bold">${index + 1}</td>`;
     if (isLeaderboard) {
-      if (player.rank === 1) rankHtml = `<td class="px-6 py-4 font-mono text-yellow-500 font-black text-lg">#1</td>`;
-      else if (player.rank === 2) rankHtml = `<td class="px-6 py-4 font-mono text-gray-400 font-bold text-md">#2</td>`;
-      else if (player.rank === 3) rankHtml = `<td class="px-6 py-4 font-mono text-amber-600 font-bold text-md">#3</td>`;
-      else rankHtml = `<td class="px-6 py-4 font-mono text-gray-500 font-semibold">#${player.rank}</td>`;
+      if (player.rank === 1) rankHtml = `<td class="px-3 py-3 md:px-6 md:py-4 font-mono text-yellow-500 font-black text-sm md:text-lg">#1</td>`;
+      else if (player.rank === 2) rankHtml = `<td class="px-3 py-3 md:px-6 md:py-4 font-mono text-gray-400 font-bold text-xs md:text-md">#2</td>`;
+      else if (player.rank === 3) rankHtml = `<td class="px-3 py-3 md:px-6 md:py-4 font-mono text-amber-600 font-bold text-xs md:text-md">#3</td>`;
+      else rankHtml = `<td class="px-3 py-3 md:px-6 md:py-4 font-mono text-gray-500 font-semibold">#${player.rank}</td>`;
     }
 
-    // Fallback avatar kosong
     const avatarSrc = player.avatar
       ? player.avatar
       : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='45' height='45' fill='none'></svg>";
@@ -240,19 +240,19 @@ function renderTable(dataArray, isLeaderboard) {
 
     tr.innerHTML = `
       ${rankHtml}
-      <td class="px-6 py-4">
-        <div class="flex items-center gap-4">
-          <img src="${escapeHtml(avatarSrc)}" class="w-10 h-10 rounded-md border border-gray-200 dark:border-industrial-600 object-cover bg-gray-100 dark:bg-industrial-800" alt="Ava">
+      <td class="px-3 py-3 md:px-6 md:py-4">
+        <div class="flex items-center gap-2 md:gap-4">
+          <img src="${escapeHtml(avatarSrc)}" class="w-7 h-7 md:w-10 md:h-10 rounded-md border border-gray-200 dark:border-industrial-600 object-cover bg-gray-100 dark:bg-industrial-800" alt="Ava">
           <div>
-            <div class="font-bold text-gray-900 dark:text-white">${escapeHtml(player.displayName || "Unknown")}</div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 font-mono">@${escapeHtml(player.username || "unknown")}</div>
+            <div class="font-bold text-[11px] md:text-sm text-gray-900 dark:text-white leading-tight">${escapeHtml(player.displayName || "Unknown")}</div>
+            <div class="text-[9px] md:text-xs text-gray-500 dark:text-gray-400 font-mono">@${escapeHtml(player.username || "unknown")}</div>
           </div>
         </div>
       </td>
-      <td class="px-6 py-4 font-medium text-gray-700 dark:text-gray-300">${escapeHtml(player.rpName || "-")}</td>
-      <td class="px-6 py-4 text-gray-600 dark:text-gray-400 max-w-[150px] truncate">${escapeHtml(player.school || "-")}</td>
-      <td class="px-6 py-4 text-gray-600 dark:text-gray-400">${escapeHtml(player.class || "-")}</td>
-      <td class="px-6 py-4 text-right font-mono font-bold text-brand-600 dark:text-brand-400 text-lg">${valueToShow.toLocaleString("id-ID")}</td>
+      <td class="px-3 py-3 md:px-6 md:py-4 font-medium text-gray-700 dark:text-gray-300 text-[11px] md:text-sm">${escapeHtml(player.rpName || "-")}</td>
+      <td class="px-3 py-3 md:px-6 md:py-4 text-gray-600 dark:text-gray-400 max-w-[100px] md:max-w-[150px] truncate text-[11px] md:text-sm">${escapeHtml(player.school || "-")}</td>
+      <td class="px-3 py-3 md:px-6 md:py-4 text-gray-600 dark:text-gray-400 text-[11px] md:text-sm">${escapeHtml(player.class || "-")}</td>
+      <td class="px-3 py-3 md:px-6 md:py-4 text-right font-mono font-bold text-brand-600 dark:text-brand-400 text-sm md:text-lg">${valueToShow.toLocaleString("id-ID")}</td>
     `;
 
     tr.onclick = () => openPlayerDetail(player.userId);

@@ -15,16 +15,10 @@
         extend: {
           colors: {
             industrial: {
-              950: '#09090b', // Deep zinc
-              900: '#121214', // Sub bg
-              800: '#18181b', // Card bg
-              700: '#27272a', // Border
-              600: '#3f3f46', // Border light
+              950: '#09090b', 900: '#121214', 800: '#18181b', 700: '#27272a', 600: '#3f3f46',
             },
             brand: {
-              400: '#34d399', // Emerald light
-              500: '#10b981', // Emerald primary
-              600: '#059669', // Emerald dark (Light mode accent)
+              400: '#34d399', 500: '#10b981', 600: '#059669',
             }
           },
           fontFamily: {
@@ -37,16 +31,12 @@
   </script>
 
   <style>
-    /* Custom Scrollbar for Industrial Feel */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #10b981; }
     
-    /* Smooth Theme Transition */
     * { transition: background-color 0.2s ease, border-color 0.2s ease; }
-    
-    /* Utilities */
     .glass-panel { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
     .loader { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
@@ -61,60 +51,66 @@
   </script>
 </head>
 
-<body class="bg-gray-100 dark:bg-industrial-950 text-gray-900 dark:text-gray-100 font-sans min-h-screen antialiased selection:bg-brand-500 selection:text-white">
+<body class="bg-gray-100 dark:bg-industrial-950 text-gray-900 dark:text-gray-100 font-sans min-h-screen antialiased selection:bg-brand-500 selection:text-white pb-6 md:pb-0">
 
-  <main class="max-w-[1400px] mx-auto p-4 md:p-6 lg:p-8 flex flex-col gap-6">
+  <main class="max-w-[1400px] mx-auto p-3 md:p-6 lg:p-8 flex flex-col gap-4 md:gap-6">
     
-    <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-industrial-900 p-5 rounded-xl border border-gray-200 dark:border-industrial-700 shadow-sm">
-      <div class="flex items-center gap-3">
-        <div class="p-2 bg-brand-500/10 rounded-lg">
-          <i data-lucide="activity" class="w-6 h-6 text-brand-600 dark:text-brand-400"></i>
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-industrial-900 p-4 md:p-5 rounded-xl border border-gray-200 dark:border-industrial-700 shadow-sm">
+      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+        <div class="flex items-center gap-3">
+          <div class="p-1.5 md:p-2 bg-brand-500/10 rounded-lg">
+            <i data-lucide="activity" class="w-5 h-5 md:w-6 md:h-6 text-brand-600 dark:text-brand-400"></i>
+          </div>
+          <div>
+            <h1 class="text-lg md:text-2xl font-bold uppercase tracking-wide text-gray-900 dark:text-white leading-tight">Data Monitoring</h1>
+            <p class="text-[10px] md:text-sm text-gray-500 dark:text-gray-400 font-mono">Land of Character // Central</p>
+          </div>
         </div>
-        <div>
-          <h1 class="text-xl md:text-2xl font-bold uppercase tracking-wide text-gray-900 dark:text-white">Data Monitoring</h1>
-          <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 font-mono">Land of Character // Central Node</p>
-        </div>
+        <button id="themeToggleBtn" aria-label="Toggle Theme" class="p-2 md:hidden bg-gray-100 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg text-gray-600 dark:text-gray-300">
+          <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+          <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+        </button>
       </div>
 
-      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+      <div class="flex flex-row items-center gap-2 w-full md:w-auto">
         <div class="relative flex-1 md:w-64">
           <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-          <input type="number" id="manualUserId" placeholder="Cari User ID..." class="w-full bg-gray-50 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-shadow">
+          <input type="number" id="manualUserId" placeholder="Cari User ID..." class="w-full bg-gray-50 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg pl-9 pr-3 py-2 md:py-2.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
-        <button id="manualSearchBtn" class="flex items-center gap-2 bg-brand-600 hover:bg-brand-500 dark:bg-brand-500 dark:hover:bg-brand-400 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors">
+        <button id="manualSearchBtn" class="flex items-center justify-center bg-brand-600 hover:bg-brand-500 dark:bg-brand-500 text-white px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-xs md:text-sm font-semibold transition-colors">
           Cari
         </button>
-        <button id="themeToggleBtn" aria-label="Toggle Theme" class="p-2.5 bg-gray-100 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg hover:bg-gray-200 dark:hover:bg-industrial-700 transition-colors text-gray-600 dark:text-gray-300">
+        <button id="themeToggleBtnDesktop" aria-label="Toggle Theme" class="hidden md:block p-2.5 bg-gray-100 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg hover:bg-gray-200 dark:hover:bg-industrial-700 transition-colors text-gray-600 dark:text-gray-300">
           <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
           <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
         </button>
       </div>
     </header>
 
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <button id="btnUsers" onclick="loadAllUsers()" class="tab-btn active flex items-center justify-center gap-2 p-4 bg-white dark:bg-industrial-800 border border-brand-500 text-brand-600 dark:text-brand-400 rounded-xl font-bold shadow-sm transition-all">
-        <i data-lucide="users" class="w-5 h-5"></i> Semua Pemain
+    <section class="grid grid-cols-4 gap-2 md:gap-3">
+      <button id="btnUsers" onclick="loadAllUsers()" class="tab-btn active flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 p-2.5 md:p-4 bg-white dark:bg-industrial-800 border text-center rounded-xl font-bold transition-all text-[10px] md:text-sm leading-tight">
+        <i data-lucide="users" class="w-4 h-4 md:w-5 md:h-5"></i> <span class="hidden sm:inline">Semua Pemain</span><span class="sm:hidden">Pemain</span>
       </button>
-      <button id="btnLevel" onclick="loadLeaderboard('level')" class="tab-btn flex items-center justify-center gap-2 p-4 bg-white dark:bg-industrial-800 border border-gray-200 dark:border-industrial-700 text-gray-600 dark:text-gray-400 rounded-xl font-semibold hover:border-gray-300 dark:hover:border-industrial-600 hover:bg-gray-50 dark:hover:bg-industrial-700 transition-all">
-        <i data-lucide="trending-up" class="w-5 h-5"></i> Top Level
+      <button id="btnLevel" onclick="loadLeaderboard('level')" class="tab-btn flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 p-2.5 md:p-4 bg-white dark:bg-industrial-800 border border-gray-200 dark:border-industrial-700 text-gray-600 dark:text-gray-400 rounded-xl font-semibold transition-all text-[10px] md:text-sm leading-tight">
+        <i data-lucide="trending-up" class="w-4 h-4 md:w-5 md:h-5"></i> Top Level
       </button>
-      <button id="btnCoins" onclick="loadLeaderboard('coins')" class="tab-btn flex items-center justify-center gap-2 p-4 bg-white dark:bg-industrial-800 border border-gray-200 dark:border-industrial-700 text-gray-600 dark:text-gray-400 rounded-xl font-semibold hover:border-gray-300 dark:hover:border-industrial-600 hover:bg-gray-50 dark:hover:bg-industrial-700 transition-all">
-        <i data-lucide="database" class="w-5 h-5"></i> Top Coins
+      <button id="btnCoins" onclick="loadLeaderboard('coins')" class="tab-btn flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 p-2.5 md:p-4 bg-white dark:bg-industrial-800 border border-gray-200 dark:border-industrial-700 text-gray-600 dark:text-gray-400 rounded-xl font-semibold transition-all text-[10px] md:text-sm leading-tight">
+        <i data-lucide="database" class="w-4 h-4 md:w-5 md:h-5"></i> Top Coins
       </button>
-      <button id="btnScore" onclick="loadLeaderboard('score')" class="tab-btn flex items-center justify-center gap-2 p-4 bg-white dark:bg-industrial-800 border border-gray-200 dark:border-industrial-700 text-gray-600 dark:text-gray-400 rounded-xl font-semibold hover:border-gray-300 dark:hover:border-industrial-600 hover:bg-gray-50 dark:hover:bg-industrial-700 transition-all">
-        <i data-lucide="crosshair" class="w-5 h-5"></i> Top Score
+      <button id="btnScore" onclick="loadLeaderboard('score')" class="tab-btn flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 p-2.5 md:p-4 bg-white dark:bg-industrial-800 border border-gray-200 dark:border-industrial-700 text-gray-600 dark:text-gray-400 rounded-xl font-semibold transition-all text-[10px] md:text-sm leading-tight">
+        <i data-lucide="crosshair" class="w-4 h-4 md:w-5 md:h-5"></i> Top Score
       </button>
     </section>
 
-    <div id="usersToolbar" class="flex flex-col md:flex-row gap-3 bg-white dark:bg-industrial-900 p-4 rounded-xl border border-gray-200 dark:border-industrial-700 shadow-sm hidden">
+    <div id="usersToolbar" class="flex flex-col md:flex-row gap-2.5 md:gap-3 bg-white dark:bg-industrial-900 p-3 md:p-4 rounded-xl border border-gray-200 dark:border-industrial-700 shadow-sm hidden">
       <div class="relative flex-1">
         <i data-lucide="filter" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-        <input type="text" id="searchInput" placeholder="Filter berdasarkan Username, Name, Instansi..." class="w-full bg-gray-50 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+        <input type="text" id="searchInput" placeholder="Filter Username, RP Name, Instansi..." class="w-full bg-gray-50 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg pl-9 pr-3 py-2 md:py-2.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
       </div>
-      <select id="sortSelect" class="w-full md:w-64 bg-gray-50 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 appearance-none cursor-pointer">
+      <select id="sortSelect" class="w-full md:w-56 bg-gray-50 dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-lg px-3 py-2 md:py-2.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 appearance-none cursor-pointer">
         <option value="name-asc">Username (A - Z)</option>
         <option value="name-desc">Username (Z - A)</option>
-        <option value="rp-asc">Name (A - Z)</option>
+        <option value="rp-asc">RP Name (A - Z)</option>
         <option value="school-asc">School (A - Z)</option>
         <option value="class-asc">Class (A - Z)</option>
         <option value="level-desc">Level Tertinggi</option>
@@ -123,15 +119,15 @@
 
     <div class="bg-white dark:bg-industrial-800 border border-gray-200 dark:border-industrial-700 rounded-xl shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
-        <table id="mainTable" class="w-full text-left text-sm whitespace-nowrap">
-          <thead class="bg-gray-50 dark:bg-industrial-900 text-gray-500 dark:text-gray-400 font-semibold uppercase text-xs tracking-wider border-b border-gray-200 dark:border-industrial-700">
+        <table id="mainTable" class="w-full text-left text-xs md:text-sm whitespace-nowrap">
+          <thead class="bg-gray-50 dark:bg-industrial-900 text-gray-500 dark:text-gray-400 font-semibold uppercase text-[10px] md:text-xs tracking-wider border-b border-gray-200 dark:border-industrial-700">
             <tr>
-              <th width="8%" class="px-6 py-4" id="colRank">ID</th>
-              <th width="25%" class="px-6 py-4">Roblox Account</th>
-              <th width="20%" class="px-6 py-4">Name</th>
-              <th width="15%" class="px-6 py-4">School</th>
-              <th width="10%" class="px-6 py-4">Class</th>
-              <th width="22%" class="px-6 py-4 text-right" id="lbValueHeader">Level</th>
+              <th class="px-3 py-3 md:px-6 md:py-4" id="colRank">ID</th>
+              <th class="px-3 py-3 md:px-6 md:py-4">Account</th>
+              <th class="px-3 py-3 md:px-6 md:py-4">RP Name</th>
+              <th class="px-3 py-3 md:px-6 md:py-4">School</th>
+              <th class="px-3 py-3 md:px-6 md:py-4">Class</th>
+              <th class="px-3 py-3 md:px-6 md:py-4 text-right" id="lbValueHeader">Level</th>
             </tr>
           </thead>
           <tbody id="lbBody" class="divide-y divide-gray-100 dark:divide-industrial-700">
@@ -141,86 +137,85 @@
     </div>
   </main>
 
-  <div id="playerModal" class="fixed inset-0 bg-gray-900/80 glass-panel z-50 hidden flex-col justify-center items-center p-4 overflow-y-auto">
-    <div class="bg-white dark:bg-industrial-800 border border-gray-200 dark:border-industrial-600 rounded-xl w-full max-w-4xl shadow-2xl relative my-auto">
+  <div id="playerModal" class="fixed inset-0 bg-gray-900/80 glass-panel z-50 hidden flex-col justify-end md:justify-center items-center md:p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-industrial-800 border-t md:border border-gray-200 dark:border-industrial-600 rounded-t-2xl md:rounded-xl w-full max-w-4xl shadow-2xl relative mt-16 md:mt-0 md:my-auto max-h-[90vh] overflow-y-auto">
       
-      <button onclick="closeModal()" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors">
-        <i data-lucide="x" class="w-6 h-6"></i>
+      <button onclick="closeModal()" class="absolute top-3 right-3 md:top-4 md:right-4 p-1.5 md:p-2 bg-gray-100 dark:bg-industrial-700 text-gray-500 hover:text-red-500 rounded-full md:rounded-lg transition-colors z-10">
+        <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <div id="modalLoading" class="loader p-12 text-center text-brand-600 dark:text-brand-400 font-mono font-bold tracking-widest hidden">
-        [ FETCHING SERVER DATA... ]
+      <div id="modalLoading" class="loader p-10 md:p-12 text-center text-brand-600 dark:text-brand-400 font-mono text-xs md:text-sm font-bold tracking-widest hidden">
+        [ FETCHING DATA... ]
       </div>
 
-      <div id="modalData" class="p-6 md:p-8 hidden">
+      <div id="modalData" class="p-4 md:p-8 hidden">
         
-        <div class="flex flex-col md:flex-row gap-5 items-center md:items-start border-b border-gray-200 dark:border-industrial-700 pb-6 mb-6">
-          <img id="modAvatar" src="" alt="Avatar" class="w-20 h-20 rounded-xl border-2 border-brand-500 bg-gray-100 dark:bg-industrial-700 object-cover shadow-md">
-          <div class="text-center md:text-left">
-            <h2 id="modDisplayName" class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Display Name</h2>
-            <p class="text-sm font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-industrial-900 px-3 py-1 rounded-md inline-block">
-              @<span id="modUsername">username</span> | UID: <span id="modUserId" class="text-brand-600 dark:text-brand-400">0000000</span>
+        <div class="flex flex-row gap-4 items-center border-b border-gray-200 dark:border-industrial-700 pb-4 mb-4 md:pb-6 md:mb-6">
+          <img id="modAvatar" src="" alt="Avatar" class="w-14 h-14 md:w-20 md:h-20 rounded-xl border-2 border-brand-500 bg-gray-100 dark:bg-industrial-700 object-cover shadow-sm">
+          <div class="text-left">
+            <h2 id="modDisplayName" class="text-lg md:text-2xl font-bold text-gray-900 dark:text-white leading-tight">Name</h2>
+            <p class="text-[10px] md:text-sm mt-1 font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-industrial-900 px-2 py-0.5 rounded-md inline-block">
+              @<span id="modUsername">user</span> | ID: <span id="modUserId" class="text-brand-600 dark:text-brand-400">0</span>
             </p>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
           
-          <div class="bg-gray-50 dark:bg-industrial-900 p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
-            <div class="flex items-center gap-2 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
-              <i data-lucide="user" class="w-4 h-4"></i> Profile & Academic
+          <div class="bg-gray-50 dark:bg-industrial-900 p-3.5 md:p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
+            <div class="flex items-center gap-1.5 text-brand-600 dark:text-brand-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2.5 md:mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
+              <i data-lucide="user" class="w-3.5 h-3.5"></i> Profile & Academic
             </div>
-            <div class="space-y-3 text-sm">
-              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Name</span> <strong id="resRpName" class="font-mono text-gray-900 dark:text-white"></strong></div>
+            <div class="space-y-2 md:space-y-3 text-xs md:text-sm">
+              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">RP Name</span> <strong id="resRpName" class="font-mono text-gray-900 dark:text-white"></strong></div>
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Gender</span> <strong id="resGender" class="font-mono text-gray-900 dark:text-white"></strong></div>
-              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">School</span> <strong id="resSchool" class="font-mono text-gray-900 dark:text-white text-right break-words max-w-[150px]"></strong></div>
+              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">School</span> <strong id="resSchool" class="font-mono text-gray-900 dark:text-white text-right break-words max-w-[120px] md:max-w-[150px]"></strong></div>
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Class</span> <strong id="resClass" class="font-mono text-gray-900 dark:text-white"></strong></div>
             </div>
           </div>
 
-          <div class="bg-gray-50 dark:bg-industrial-900 p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
-            <div class="flex items-center gap-2 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
-              <i data-lucide="wallet" class="w-4 h-4"></i> Economy DB
+          <div class="bg-gray-50 dark:bg-industrial-900 p-3.5 md:p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
+            <div class="flex items-center gap-1.5 text-brand-600 dark:text-brand-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2.5 md:mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
+              <i data-lucide="wallet" class="w-3.5 h-3.5"></i> Economy DB
             </div>
-            <div class="space-y-3 text-sm">
-              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Level</span> <strong id="resLevel" class="font-mono text-lg text-brand-600 dark:text-brand-400"></strong></div>
+            <div class="space-y-2 md:space-y-3 text-xs md:text-sm">
+              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Level</span> <strong id="resLevel" class="font-mono text-base md:text-lg text-brand-600 dark:text-brand-400"></strong></div>
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Coins</span> <strong id="resCoins" class="font-mono text-gray-900 dark:text-white"></strong></div>
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Login Streak</span> <strong id="resStreak" class="font-mono text-gray-900 dark:text-white"></strong></div>
             </div>
           </div>
 
-          <div class="bg-gray-50 dark:bg-industrial-900 p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
-            <div class="flex items-center gap-2 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
-              <i data-lucide="map" class="w-4 h-4"></i> Journey State
+          <div class="bg-gray-50 dark:bg-industrial-900 p-3.5 md:p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
+            <div class="flex items-center gap-1.5 text-brand-600 dark:text-brand-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2.5 md:mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
+              <i data-lucide="map" class="w-3.5 h-3.5"></i> Journey State
             </div>
-            <div class="space-y-3 text-sm">
-              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Active Lock</span> <strong id="resActiveLock" class="font-mono text-gray-900 dark:text-white bg-gray-200 dark:bg-industrial-700 px-2 py-0.5 rounded"></strong></div>
-              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Journey Type (J5)</span> <strong id="resJ5Type" class="font-mono text-gray-900 dark:text-white bg-gray-200 dark:bg-industrial-700 px-2 py-0.5 rounded"></strong></div>
+            <div class="space-y-2 md:space-y-3 text-xs md:text-sm">
+              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Active Lock</span> <strong id="resActiveLock" class="font-mono text-gray-900 dark:text-white bg-gray-200 dark:bg-industrial-700 px-1.5 py-0.5 rounded"></strong></div>
+              <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Journey Type (J5)</span> <strong id="resJ5Type" class="font-mono text-gray-900 dark:text-white bg-gray-200 dark:bg-industrial-700 px-1.5 py-0.5 rounded"></strong></div>
             </div>
           </div>
 
-          <div class="bg-gray-50 dark:bg-industrial-900 p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
-            <div class="flex items-center gap-2 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
-              <i data-lucide="award" class="w-4 h-4"></i> Reward Progress
+          <div class="bg-gray-50 dark:bg-industrial-900 p-3.5 md:p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
+            <div class="flex items-center gap-1.5 text-brand-600 dark:text-brand-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2.5 md:mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
+              <i data-lucide="award" class="w-3.5 h-3.5"></i> Reward Progress
             </div>
-            
-            <div class="space-y-4">
+            <div class="space-y-3 md:space-y-4">
               <div>
-                <div class="flex justify-between text-xs font-bold mb-1">
+                <div class="flex justify-between text-[10px] md:text-xs font-bold mb-1">
                   <span class="text-gray-500 dark:text-gray-400">Standard Quiz</span>
                   <span id="resQuizCount" class="font-mono text-brand-600 dark:text-brand-400">0/5</span>
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-industrial-700 rounded-full h-2 overflow-hidden">
-                  <div id="resQuizFill" class="bg-brand-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                <div class="w-full bg-gray-200 dark:bg-industrial-700 rounded-full h-1.5 md:h-2 overflow-hidden">
+                  <div id="resQuizFill" class="bg-brand-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
                 </div>
               </div>
               <div>
-                <div class="flex justify-between text-xs font-bold mb-1">
+                <div class="flex justify-between text-[10px] md:text-xs font-bold mb-1">
                   <span class="text-gray-500 dark:text-gray-400">TTS Quiz</span>
                   <span id="resTtsCount" class="font-mono text-brand-600 dark:text-brand-400">0/5</span>
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-industrial-700 rounded-full h-2 overflow-hidden">
-                  <div id="resTtsFill" class="bg-brand-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                <div class="w-full bg-gray-200 dark:bg-industrial-700 rounded-full h-1.5 md:h-2 overflow-hidden">
+                  <div id="resTtsFill" class="bg-brand-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
                 </div>
               </div>
             </div>
@@ -228,13 +223,12 @@
 
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          
-          <div class="bg-gray-50 dark:bg-industrial-900 p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
-            <div class="flex items-center gap-2 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
-              <i data-lucide="medal" class="w-4 h-4"></i> Quiz Scores
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 mt-3 md:mt-6">
+          <div class="bg-gray-50 dark:bg-industrial-900 p-3.5 md:p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
+            <div class="flex items-center gap-1.5 text-brand-600 dark:text-brand-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2.5 md:mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
+              <i data-lucide="medal" class="w-3.5 h-3.5"></i> Quiz Scores
             </div>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+            <div class="grid grid-cols-2 gap-x-3 gap-y-2 text-xs md:text-sm">
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Truth</span> <strong id="scoreTruth" class="font-mono text-gray-900 dark:text-white"></strong></div>
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Time</span> <strong id="scoreTime" class="font-mono text-gray-900 dark:text-white"></strong></div>
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Magic</span> <strong id="scoreMagic" class="font-mono text-gray-900 dark:text-white"></strong></div>
@@ -243,11 +237,11 @@
             </div>
           </div>
 
-          <div class="bg-gray-50 dark:bg-industrial-900 p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
-            <div class="flex items-center gap-2 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
-              <i data-lucide="mic" class="w-4 h-4"></i> TTS Scores
+          <div class="bg-gray-50 dark:bg-industrial-900 p-3.5 md:p-5 rounded-xl border border-gray-200 dark:border-industrial-700">
+            <div class="flex items-center gap-1.5 text-brand-600 dark:text-brand-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2.5 md:mb-4 border-b border-gray-200 dark:border-industrial-700 pb-2">
+              <i data-lucide="mic" class="w-3.5 h-3.5"></i> TTS Scores
             </div>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+            <div class="grid grid-cols-2 gap-x-3 gap-y-2 text-xs md:text-sm">
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Truth</span> <strong id="scoreTTS_Truth" class="font-mono text-gray-900 dark:text-white"></strong></div>
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Time</span> <strong id="scoreTTS_Time" class="font-mono text-gray-900 dark:text-white"></strong></div>
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Magic</span> <strong id="scoreTTS_Magic" class="font-mono text-gray-900 dark:text-white"></strong></div>
@@ -255,7 +249,6 @@
               <div class="flex justify-between items-center"><span class="text-gray-500 dark:text-gray-400">Trust</span> <strong id="scoreTTS_Trust" class="font-mono text-gray-900 dark:text-white"></strong></div>
             </div>
           </div>
-          
         </div>
 
       </div>
@@ -263,5 +256,17 @@
   </div>
 
   <script src="./app.js"></script>
+  <script>
+    // Event listener ganda untuk toggle tema yang sudah dipisah mobile/desktop
+    const tBtn1 = document.getElementById("themeToggleBtn");
+    const tBtn2 = document.getElementById("themeToggleBtnDesktop");
+    const toggleTheme = () => {
+      const html = document.documentElement;
+      html.classList.toggle('dark');
+      localStorage.setItem("theme", html.classList.contains('dark') ? 'dark' : 'light');
+    };
+    if (tBtn1) tBtn1.addEventListener("click", toggleTheme);
+    if (tBtn2) tBtn2.addEventListener("click", toggleTheme);
+  </script>
 </body>
 </html>
