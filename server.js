@@ -96,21 +96,47 @@ async function fetchEcoSmart(userId) {
 }
 
 // ==========================================
-// PROFILE DATA
+// PROFILE DATA (Update: Tambah Gender)
 // ==========================================
 
 async function fetchProfileData(userId) {
-  const [rpName, school, className] = await Promise.all([
+  const [rpName, school, className, gender] = await Promise.all([
     fetchRobloxData("RoleplayProfileDB_V3", `${userId}_RPName`),
     fetchRobloxData("RoleplayProfileDB_V3", `${userId}_School`),
     fetchRobloxData("RoleplayProfileDB_V3", `${userId}_Class`),
+    fetchRobloxData("RoleplayProfileDB_V3", `${userId}_Gender`),
   ]);
 
   return {
     rpName: rpName || "-",
     school: school || "-",
     class: className || "-",
+    gender: gender || "-",
   };
+}
+
+// ==========================================
+// JOURNEY DATA (BARU)
+// ==========================================
+
+async function fetchJourneyData(userId) {
+  const [activeLock, j5Type] = await Promise.all([
+    fetchRobloxData("JourneyLockDB_V1", `${userId}_ActiveLock`),
+    fetchRobloxData("JourneyStateDB_V5", `${userId}_J5_Type`),
+  ]);
+  return { activeLock, j5Type };
+}
+
+// ==========================================
+// REWARD DATA (BARU)
+// ==========================================
+
+async function fetchRewardData(userId) {
+  const completedQuizzes = await fetchRobloxData(
+    "RoleplayRewardDB_V1",
+    `${userId}_CompletedQuizzes`
+  );
+  return { completedQuizzes };
 }
 
 // ==========================================
@@ -126,6 +152,8 @@ app.get("/api/player/:userId", async (req, res) => {
       avatarUrl,
       ecoData,
       profileData,
+      journeyData,
+      rewardData,
       scoreTruth,
       scoreTime,
       scoreMagic,
@@ -141,6 +169,8 @@ app.get("/api/player/:userId", async (req, res) => {
       fetchRobloxAvatar(userId),
       fetchEcoSmart(userId),
       fetchProfileData(userId),
+      fetchJourneyData(userId),
+      fetchRewardData(userId),
       fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Truth`),
       fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Time`),
       fetchRobloxData("LandOfCharacter_Scores_V2", `${userId}_Magic`),
@@ -160,6 +190,8 @@ app.get("/api/player/:userId", async (req, res) => {
       },
       RoleplayEcoDB_V4: ecoData,
       RoleplayProfileDB_V3: profileData,
+      JourneyLockDB_V1: journeyData,
+      RoleplayRewardDB_V1: rewardData,
       Scores: {
         Truth: scoreTruth,
         Time: scoreTime,

@@ -49,9 +49,29 @@ function setActiveTab(tabId) {
   document.getElementById(tabId).classList.add("active");
 }
 
+// --- TEMA (LIGHT/DARK MODE TOGGLE) ---
+const themeToggleBtn = document.getElementById("themeToggleBtn");
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener("click", () => {
+    const root = document.documentElement;
+    const currentTheme = root.getAttribute("data-theme");
+    
+    // Logika ganti tema
+    const newTheme = currentTheme === "light" ? "dark" : "light";
+    
+    if (newTheme === "dark") {
+      root.removeAttribute("data-theme");
+      localStorage.setItem("theme", "dark");
+    } else {
+      root.setAttribute("data-theme", "light");
+      localStorage.setItem("theme", "light");
+    }
+  });
+}
+
 // --- STATE MANAGEMENT ---
 let cachedAllUsers = [];
-let currentMode = "users"; // "users" atau "leaderboard"
+let currentMode = "users";
 
 // helper untuk fetch JSON yang lebih aman
 async function fetchJsonSafe(url) {
@@ -88,7 +108,7 @@ async function loadAllUsers() {
   setActiveTab("btnUsers");
   currentMode = "users";
   usersToolbar.style.display = "flex";
-  colRank.textContent = "No";
+  colRank.textContent = "ID";
   lbValueHeader.textContent = "Level";
 
   if (cachedAllUsers.length > 0) {
@@ -103,7 +123,7 @@ async function loadAllUsers() {
     cachedAllUsers = Array.isArray(data) ? data : [];
     filterAndSortUsers();
   } catch (error) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#ff4d4d;">Error: ${escapeHtml(error.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--danger); border: 1px dashed var(--danger);">System Error: ${escapeHtml(error.message)}</td></tr>`;
   }
 }
 
@@ -141,7 +161,6 @@ function filterAndSortUsers() {
   renderTable(filtered, false);
 }
 
-// Event Listener untuk Search & Sort Instan
 document.getElementById("searchInput").addEventListener("input", filterAndSortUsers);
 document.getElementById("sortSelect").addEventListener("change", filterAndSortUsers);
 
@@ -157,20 +176,20 @@ async function loadLeaderboard(type) {
   if (type === "level") lbValueHeader.textContent = "Player Level";
   if (type === "score") lbValueHeader.textContent = "Total Quiz Score";
 
-  tbody.innerHTML = `<tr><td colspan="6" class="loader">MEMUAT LEADERBOARD...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="6" class="loader">MEMUAT DATABASE...</td></tr>`;
 
   try {
     const data = await fetchJsonSafe(`/api/leaderboard/${type}`);
     renderTable(Array.isArray(data) ? data : [], true);
   } catch (error) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#ff4d4d;">Error: ${escapeHtml(error.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--danger); border: 1px dashed var(--danger);">System Error: ${escapeHtml(error.message)}</td></tr>`;
   }
 }
 
 // --- RENDER TABEL (REUSABLE) ---
 function renderTable(dataArray, isLeaderboard) {
   if (!Array.isArray(dataArray) || dataArray.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">Tidak ada data yang cocok.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">0 Records Found.</td></tr>`;
     return;
   }
 
@@ -182,15 +201,15 @@ function renderTable(dataArray, isLeaderboard) {
 
     let rankHtml = `<td class="idx-col">${index + 1}</td>`;
     if (isLeaderboard) {
-      if (player.rank === 1) rankHtml = `<td style="color:#ffd700; font-weight:bold; font-size:16px;">#1</td>`;
-      else if (player.rank === 2) rankHtml = `<td style="color:#c0c0c0; font-weight:bold;">#2</td>`;
-      else if (player.rank === 3) rankHtml = `<td style="color:#cd7f32; font-weight:bold;">#3</td>`;
+      if (player.rank === 1) rankHtml = `<td class="idx-col rank-1">#1</td>`;
+      else if (player.rank === 2) rankHtml = `<td class="idx-col rank-2">#2</td>`;
+      else if (player.rank === 3) rankHtml = `<td class="idx-col rank-3">#3</td>`;
       else rankHtml = `<td class="idx-col">#${player.rank}</td>`;
     }
 
     const avatarSrc = player.avatar
       ? player.avatar
-      : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='45' height='45' fill='%2327272a'><rect width='100%' height='100%'/></svg>";
+      : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='45' height='45' fill='none'></svg>";
 
     const valueToShow = isLeaderboard
       ? getNumericValue(player.value)
@@ -202,7 +221,7 @@ function renderTable(dataArray, isLeaderboard) {
         <div class="avatar-cell">
           <img src="${escapeHtml(avatarSrc)}" class="avatar-img" alt="Ava">
           <div>
-            <div style="font-weight: bold; color: #fff;">${escapeHtml(player.displayName || "Unknown")}</div>
+            <div style="font-weight: bold; color: var(--text);">${escapeHtml(player.displayName || "Unknown")}</div>
             <div style="font-size: 12px; color: var(--text-muted); font-family: monospace;">@${escapeHtml(player.username || "unknown")}</div>
           </div>
         </div>
@@ -235,23 +254,77 @@ async function openPlayerDetail(userId) {
     const eco = data.RoleplayEcoDB_V4 || {};
     const profile = data.RoleplayProfileDB_V3 || {};
     const scores = data.Scores || {};
+    const journey = data.JourneyLockDB_V1 || {};
+    const reward = data.RoleplayRewardDB_V1 || {};
 
     document.getElementById("resCoins").textContent = displayValue(eco, "Coins");
     document.getElementById("resLevel").textContent = displayValue(eco, "Level");
     document.getElementById("resStreak").textContent = displayValue(eco, "LoginStreak");
 
-    document.getElementById("resSchool").textContent = displayValue(profile, "School");
-    document.getElementById("resClass").textContent = displayValue(profile, "Class");
-    document.getElementById("resRpName").textContent = displayValue(profile, "RPName");
+    document.getElementById("resSchool").textContent = displayValue(profile, "school");
+    document.getElementById("resClass").textContent = displayValue(profile, "class");
+    document.getElementById("resRpName").textContent = displayValue(profile, "rpName");
+    document.getElementById("resGender").textContent = displayValue(profile, "gender");
 
-    // Quiz Scores
+    // Journey
+    document.getElementById("resActiveLock").textContent =
+      journey.activeLock !== null && journey.activeLock !== undefined
+        ? String(journey.activeLock)
+        : "-";
+    document.getElementById("resJ5Type").textContent =
+      journey.j5Type !== null && journey.j5Type !== undefined
+        ? String(journey.j5Type)
+        : "-";
+
+    // Reward - Parsing Progress Bar Data
+    const cq = reward.completedQuizzes;
+    let quizzes = [];
+    
+    if (cq !== null && cq !== undefined) {
+      if (Array.isArray(cq)) {
+        quizzes = cq;
+      } else if (typeof cq === "object") {
+        quizzes = Object.keys(cq);
+      } else if (typeof cq === "string") {
+        // Handle jika data datang sebagai string panjang
+        quizzes = cq.split(",");
+      } else {
+        quizzes = [String(cq)];
+      }
+    }
+
+    let quizCount = 0;
+    let ttsCount = 0;
+    const MAX_QUIZ = 5;
+
+    quizzes.forEach(q => {
+      const qName = String(q).trim();
+      // Pilah data mana yang Standard Quiz dan mana yang TTS
+      if (qName.startsWith("Quiz_") || qName === "Quiz") {
+        quizCount++;
+      } else if (qName.startsWith("TTS_") || qName === "TTS") {
+        ttsCount++;
+      }
+    });
+
+    // Batasi hitungan supaya bar tidak tembus 100% jika ada duplikat entri dari Roblox
+    quizCount = Math.min(quizCount, MAX_QUIZ);
+    ttsCount = Math.min(ttsCount, MAX_QUIZ);
+
+    // Apply ke HTML
+    document.getElementById("resQuizCount").textContent = `${quizCount}/${MAX_QUIZ}`;
+    document.getElementById("resQuizFill").style.width = `${(quizCount / MAX_QUIZ) * 100}%`;
+
+    document.getElementById("resTtsCount").textContent = `${ttsCount}/${MAX_QUIZ}`;
+    document.getElementById("resTtsFill").style.width = `${(ttsCount / MAX_QUIZ) * 100}%`;
+
+    // Quiz & TTS Scores
     document.getElementById("scoreTruth").textContent = displayValue(scores, "Truth");
     document.getElementById("scoreTime").textContent = displayValue(scores, "Time");
     document.getElementById("scoreMagic").textContent = displayValue(scores, "Magic");
     document.getElementById("scoreKind").textContent = displayValue(scores, "Kind");
     document.getElementById("scoreTrust").textContent = displayValue(scores, "Trust");
 
-    // TTS Scores
     document.getElementById("scoreTTS_Truth").textContent = displayValue(scores, "TTS_Truth");
     document.getElementById("scoreTTS_Time").textContent = displayValue(scores, "TTS_Time");
     document.getElementById("scoreTTS_Magic").textContent = displayValue(scores, "TTS_Magic");
@@ -261,7 +334,7 @@ async function openPlayerDetail(userId) {
     modalLoading.style.display = "none";
     modalData.style.display = "block";
   } catch (error) {
-    modalLoading.textContent = "GAGAL MEMUAT DATA: " + error.message;
+    modalLoading.textContent = "SYSTEM FAILURE: " + error.message;
   }
 }
 
@@ -281,4 +354,6 @@ document.getElementById("manualUserId").addEventListener("keypress", (e) => {
 // INIT AWAL
 window.addEventListener("DOMContentLoaded", () => {
   loadAllUsers();
+  // Merender ikon SVG Lucide setelah DOM siap
+  lucide.createIcons();
 });
